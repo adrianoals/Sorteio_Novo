@@ -28,3 +28,41 @@ function revelarLinhasProgressivamente() {
     }
 }
 
+
+
+// document.addEventListener('DOMContentLoaded', function() {
+//     revelarLinhasProgressivamente();
+// });
+
+// function revelarLinhasProgressivamente() {
+//     const linhas = document.querySelectorAll('.linha-apartamento');
+//     const loadingContainer = document.getElementById('loadingContainer');
+
+//     if (linhas.length > 0) {
+//         linhas.forEach((linha, index) => {
+//             setTimeout(() => {
+//                 linha.style.opacity = 1; // Faz a linha aparecer gradualmente
+
+//                 // Rola a página até a linha que acabou de se tornar visível
+//                 linha.scrollIntoView({ behavior: 'smooth', block: 'end' });
+
+//                 // Verifica se é a última linha
+//                 if (index === linhas.length - 1) {
+//                     // Aguarda a última linha ficar visível antes de esconder a animação
+//                     setTimeout(() => {
+//                         loadingContainer.style.display = 'none';
+//                         // Opcional: rola para o fim da página após o último elemento ser revelado
+//                         document.body.scrollIntoView({behavior: 'smooth', block: 'end'});
+//                     }, 500); // Aguarda um pouco mais para garantir que a animação de carregamento desapareça suavemente
+//                 }
+//             }, index * 250); // Ajusta para 250ms entre a revelação de cada linha para tornar a animação mais rápida
+//         });
+//     } else {
+//         loadingContainer.style.display = 'none';
+//     }
+// }
+
+
+
+
+

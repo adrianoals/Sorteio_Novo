@@ -118,7 +118,9 @@ from django.shortcuts import render, redirect
 from .models import Apartamento, GrupoVaga, Sorteio
 from django.utils import timezone
 import random
+from django.contrib.admin.views.decorators import staff_member_required
 
+@staff_member_required
 def nova_colina(request):
     if request.method == 'POST':
         # Limpar registros anteriores de sorteio
@@ -179,7 +181,7 @@ def nova_colina(request):
             'horario_conclusao_nc': request.session.get('horario_conclusao_nc', '')
         })
 
-
+@staff_member_required
 def zerar(request):
     if request.method == 'POST':
         Sorteio.objects.all().delete()

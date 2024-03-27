@@ -13,28 +13,42 @@ def cbs_index(request):
         Sorteio.objects.all().delete()
         
         # Obter todos os apartamentos
-        apartamentos = list(Apartamento.objects.all())
+        apartamentos = list(Apartamento.objects.exclude(numero_apartamento='Apto 02', bloco__bloco='B'))
 
         # Separar as vagas por bloco
-        vagas_a = list(Vaga.objects.filter(vaga__range=('Vaga 27', 'Vaga 50')))
-        vagas_b = list(Vaga.objects.filter(vaga__range=('Vaga 01', 'Vaga 26')))
-        random.shuffle(vagas_a)  # Embaralhar a lista de vagas para o bloco A
-        random.shuffle(vagas_b)  # Embaralhar a lista de vagas para o bloco B
+        vagas_a = list(Vaga.objects.filter(vaga__startswith='Vaga ', vaga__endswith='Bloco A'))
+        vagas_b = list(Vaga.objects.filter(vaga__startswith='Vaga ', vaga__endswith='Bloco B'))
+
+        # Remover Vaga 15 Bloco B para atribuição direta
+        vaga_especial = None
+        for vaga in vagas_b:
+            if vaga.vaga == 'Vaga 15 Bloco B':
+                vaga_especial = vaga
+                break
+        if vaga_especial:
+            vagas_b.remove(vaga_especial)
+        
+        # Atribuir Vaga 15 Bloco B ao Apto 02 do Bloco B diretamente
+        apto_especial = Apartamento.objects.get(numero_apartamento='Apto 02', bloco__bloco='B')
+        Sorteio.objects.create(apartamento=apto_especial, vaga=vaga_especial)
+
+        # Embaralhar as listas de vagas
+        random.shuffle(vagas_a)
+        random.shuffle(vagas_b)
 
         for apartamento in apartamentos:
             if apartamento.bloco.bloco == 'A' and vagas_a:
-                # Atribuir uma vaga do bloco A
                 vaga_selecionada = vagas_a.pop()
             elif apartamento.bloco.bloco == 'B' and vagas_b:
-                # Atribuir uma vaga do bloco B
                 vaga_selecionada = vagas_b.pop()
             else:
-                continue  # Se não houver vagas disponíveis, continuar para o próximo apartamento
+                # Se não houver vagas disponíveis, continuar para o próximo apartamento
+                continue
             Sorteio.objects.create(apartamento=apartamento, vaga=vaga_selecionada)
 
         # Marcar na sessão que o sorteio foi iniciado e armazenar o horário de conclusão
         request.session['sorteio_iniciado'] = True
-        request.session['horario_conclusao'] = timezone.localtime().strftime("%d/%m/%Y às %Hh e %Mmin e %Ss")
+        request.session['horario_conclusao'] = timezone.localtime().strftime("%d/%m/%Y às %Hh%Mmin%Ss")
 
         # Redirecionar para a mesma página para mostrar os resultados do sorteio
         return redirect('cbs_index')
@@ -42,14 +56,10 @@ def cbs_index(request):
     else:
         # Verificar se o sorteio já foi iniciado
         sorteio_iniciado = request.session.get('sorteio_iniciado', False)
-        resultados_sorteio = []
-        vagas_atribuidas = False  # Nova variável para controlar a exibição da mensagem e do botão
+        resultados_sorteio = Sorteio.objects.select_related('apartamento', 'vaga').all() if sorteio_iniciado else []
 
-        # Carregar a lista de resultados do sorteio apenas se o sorteio já foi iniciado
-        if sorteio_iniciado:
-            resultados_sorteio = Sorteio.objects.select_related('apartamento', 'vaga').all()
-            if resultados_sorteio:
-                vagas_atribuidas = True
+        # Variável para controlar a exibição da mensagem e do botão
+        vagas_atribuidas = bool(resultados_sorteio)
 
         return render(request, 'chacara_bom_sucesso/cbs_index.html', {
             'resultados_sorteio': resultados_sorteio,
@@ -57,6 +67,7 @@ def cbs_index(request):
             'sorteio_iniciado': sorteio_iniciado,
             'horario_conclusao': request.session.get('horario_conclusao', '')
         })
+
 
 
 @staff_member_required
