@@ -1,0 +1,79 @@
+{% extends 'sorteio_novo_institucional/base.html' %}
+{% load static %}
+{% block content %}
+
+        <main>
+            <div class="container-fluid mb-5" id="container-2">
+                <div class="row">
+                    <div class="col-md-2 d-none d-sm-block">
+                        {% comment %} <img class="mt-2 d-block mx-auto" src="{% static '/assets/images/'%}" alt="imagem_parking"> {% endcomment %}
+                    </div>
+                    <div class="col-md-5 align-items-center text-center text-sm-start">
+                        <h1 class=" mb-0 mt-5 pt-5 font_home_h1 text-center text-sm-start" id="titulo">Conduzindo Sorteios <br>com Clareza e Equidade</h1>
+                        <div class="pr-5">
+                            <h4 class="mt-5 mb-4 mr-5 pr-5 text-center text-sm-start">Bem-vindo à Sorteio Novo, a solução inovadora para a gestão de vagas de estacionamento em condomínios. Nossa empresa foi fundada com o objetivo de trazer transparência e equidade na alocação de vagas de garagem, um desafio comum enfrentado por muitos condomínios. 
+                            </h4>
+                            <h4 class="mr-5 pr-5 text-center text-sm-start">Com nossa tecnologia avançada e metodologia comprovada, realizamos sorteios justos e imparciais, garantindo que todos os moradores tenham oportunidades iguais de acessar vagas de  estacionamento desejáveis. Nosso sistema é fácil de usar e se integra perfeitamente à gestão do condomínio, proporcionando uma experiência tranquila e eficiente.</h4>
+                        </div>
+                            
+                    </div>
+                    <div class="col-md-4">
+                        <img class="mt-5 pt-4 d-block mx-auto" src="{% static '/assets/images/Logo-563x563_transparente_rocho.png' %}" alt="logo_rocho">
+                    </div>
+                    <div class="col-md-1"></div>
+            </div>
+
+            <div class="container-fluid mt-0" id="container-3">
+                <div class="row mt-0">
+                    <div class="col-md-2 order-md-1"></div>
+                    <div class="col-md-4 order-md-3 mt-4 align-items-center">
+                        <h4 class="texto-margem text-center text-sm-start">Visando simplificar sua assembleia e proporcionar conforto e transparência aos moradores, realizamos sorteios eletrônicos de vagas de forma rápida e eficiente.</h4>
+                        
+                        <h4 class="mt-4 text-center text-sm-start">Nos dedicamos a melhorar a convivência em condomínios, promovendo harmonia e satisfação entre os moradores. Confie em nós para tornar o processo de alocação de vagas de garagem justo e sem complicações.</h4>
+                    </div>
+                    <div class="col-md-1 order-md"></div>
+                    <div class="col-md-3 mt-5">
+                        <img class="d-block mx-auto" src="{% static '/assets/images/conference.png' %}" alt="conference_image">
+                    </div>
+                </div>
+            </div>
+
+            <div class="container-fluid mt-0" id="container-4">
+                <div class="row mt-5">
+                    <div class="col-md-2 order-md-1"></div>
+                    <div class="col-md-4 order-md-1 mt-4 align-items-center">
+                        <h2 class="texto-margem text-center text-sm-start">Pronto para levar seus sorteios para o próximo nível?</h2>
+                        <h4 class="mt-4 text-center text-sm-start">Clique no botão abaixo e descubra todas as modalidades de sorteios que nosso sistema pode oferecer.</h4>
+                        <button type="submit" class="btn rounded-circle btn-yellow wh-100 mt-4 font_subtitle">Nossas Soluções</button>
+                    </div>
+                    <div class="col-md-1 order-md-4"></div>
+                    <div class="col-md-3 order-md-3 mt-5">
+                        <img class="d-block mx-auto" src="{% static '/assets/images/next_steps.gif' %}" alt="next_steps_gif">
+                    </div>
+                </div>
+            </div>
+            
+            <div class="container-fluid mb-5" id="container-5">
+                <div class="row">
+                    <div class="col-md-2"></div>
+                    <div class="col-md-6 align-items-center">
+                        <h1 class="mb-0 mt-3 pt-3 font_home_h1" id="titulo">Porque Sorteio Novo?</h1>
+                    </div>
+                    <div class="col-md-4"></div>
+                </div>
+                <div class="row">
+                    <!-- Coluna para o vídeo -->
+                    <div class="col-md-3"></div>
+                    <div class="col-md-6 mt-4 p-2">
+                        <video width="100%" height="auto" controls>
+                            <source src="{% static '/assets/images/next_steps.gif' %}" type="video/mp4" alt="video_sorteio_novo">
+                            <source src="{% static '/assets/images/video_sorteio_novo.mp4' %}" type="video/mp4" alt="video_sorteio_novo">
+                            Seu navegador não suporta o elemento de vídeo.
+                        </video>
+                    </div>
+                    <div class="col-md-3"></div>
+                </div>
+            </div>
+        </main>
+
+{% endblock %}

@@ -1,0 +1,51 @@
+{% extends 'sorteio_novo/base.html' %}
+{% load static %}
+{% block content %}
+
+        <div class="container">
+            <h1 class="fw-normal lh-1 text-center mb-5" id="titulo">VAMOS COMEÇAR!</h1>
+        </div>
+
+        <main>
+            <!-- <div class="container-fluid" id="container-sorteio"> -->
+            <div class="p-4" id="container-sorteio">
+                <h5 class="mt-3 mb-3 font_subtitle text-dark text-center">Clique aqui para iniciar</h5>
+                {% comment %} <button type="button" class="btn btn-primary rounded-pill" id="botao-iniciar">Iniciar</button> {% endcomment %}
+                <div class="text-center">
+                    <a href="{% url 'presenca' %}" class="btn btn-primary rounded-pill" id="botao-iniciar">Iniciar</a>
+                </div>
+
+                <form class="needs-validation mt-5" id="formulario-presenca">
+                    <div class="row g-3">
+                        <div class="col-sm-3">
+                            <label for="firstName" class="form-label text-dark">Apartamento</label>
+                            <input type="text" class="form-control" id="apartamento" placeholder="Apartamento" value="" required="">
+                        </div>
+                        
+                        <div class="col-sm-3">
+                            <label for="firstName" class="form-label text-dark">Bloco</label>
+                            <input type="text" class="form-control" id="bloco" placeholder="Bloco" value="" required="">
+                        </div>
+    
+                        <div class="col-sm-3 text-dark">
+                            <label class="form-label text-dark">Presença</label>
+                            <div class="d-flex">
+                                <div class="form-check form-inline">
+                                    <input class="form-check-input" type="checkbox" value="sim" id="presenca-sim">
+                                    <label class="form-check-label" for="presenca-sim">Sim</label>
+                                </div>
+                                <div class="form-check form-inline ms-3">
+                                    <input class="form-check-input" type="checkbox" value="nao" id="presenca-nao">
+                                    <label class="form-check-label" for="presenca-nao">Não</label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            </div>
+
+        </main>
+
+
+{% endblock %}
+
