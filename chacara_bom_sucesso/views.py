@@ -3,8 +3,10 @@ from .models import Apartamento, Sorteio, Vaga
 import random
 from django.utils import timezone
 from django.contrib import messages
+from django.contrib.admin.views.decorators import staff_member_required
 
-    
+
+@staff_member_required
 def cbs_index(request):
     if request.method == 'POST':
         # Limpar registros anteriores
@@ -57,6 +59,7 @@ def cbs_index(request):
         })
 
 
+@staff_member_required
 def cbs_zerar(request):
     if request.method == 'POST':
         Sorteio.objects.all().delete()
