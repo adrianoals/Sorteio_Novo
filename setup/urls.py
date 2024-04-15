@@ -8,6 +8,7 @@ urlpatterns = [
     path('', include('chacara_bom_sucesso.urls')), 
     path('', include('nova_colina.urls')), 
     path('', include('assincon.urls')), 
+    path('', include('porcelana.urls')), 
 ]
 
 
