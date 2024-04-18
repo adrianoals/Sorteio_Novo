@@ -3,8 +3,8 @@ from porcelana.models import Apartamento, Sorteio, Vaga
 
 
 class ApartamentoAdmin(admin.ModelAdmin):
-    list_display = ('id', 'numero_apartamento')
-    list_display_links = ('id', 'numero_apartamento')
+    list_display = ('id', 'numero_apartamento', 'presenca')
+    list_display_links = ('id', 'numero_apartamento', 'presenca')
 
 class VagaAdmin(admin.ModelAdmin):
     list_display = ('id', 'vaga')
