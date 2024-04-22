@@ -176,54 +176,12 @@ def porcelana_s_apartamento(request):
         'item_de_presenca': item_de_presenca
     })
 
-
 def porcelana_sorteio(request):
     	return render(request, 'porcelana/porcelana_sorteio.html')
 
 
-# @staff_member_required
-# def porcelana_final(request):
-#     if request.method == 'POST':
-#         # Limpar registros anteriores de sorteio
-#         Sorteio.objects.all().delete()
-        
-#         # Obter todos os apartamentos e grupos de vagas
-#         apartamentos = list(Apartamento.objects.all())
-#         vagas = list(Vaga.objects.all())
-
-#         # Certifique-se de que existem vagas suficientes para todos os apartamentos
-#         if len(vagas) >= len(apartamentos):
-#             random.shuffle(vagas)
-
-#             for apartamento in apartamentos:
-#                 vaga_selecionada = vagas.pop()
-#                 Sorteio.objects.create(
-#                     apartamento=apartamento, 
-#                     vaga=vaga_selecionada
-#                 )
-#         else:
-           
-#             pass
-        
-#         # Armazenar informações do sorteio na sessão
-#         request.session['sorteio_iniciado_nc'] = True
-#         request.session['horario_conclusao_nc'] = timezone.localtime().strftime("%d/%m/%Y às %Hh e %Mmin e %Ss")
-
-#         return redirect('porcelana_aleatorio')
-    
-#     else:
-#         sorteio_iniciado_nc = request.session.get('sorteio_iniciado_nc', False)
-#         resultados_sorteio_nc = Sorteio.objects.select_related('apartamento', 'vaga').order_by('apartamento__id').all()
-#         vagas_atribuidas_nc = resultados_sorteio_nc.exists()  # Verificar se existem resultados
-
-#         return render(request, 'porcelana/porcelana_aleatorio.html', {
-#             'resultados_sorteio_nc': resultados_sorteio_nc,
-#             'vagas_atribuidas_nc': vagas_atribuidas_nc,
-#             'sorteio_iniciado_nc': sorteio_iniciado_nc,
-#             'horario_conclusao_nc': request.session.get('horario_conclusao_nc', '')
-#         })
-
 from django.shortcuts import render, redirect
+from django.contrib import messages
 from django.contrib.admin.views.decorators import staff_member_required
 from django.utils import timezone
 from .models import Apartamento, Vaga, Sorteio
@@ -232,42 +190,33 @@ import random
 @staff_member_required
 def porcelana_final(request):
     if request.method == 'POST':
-        # Limpar registros anteriores de sorteio pode não ser necessário se você quer manter histórico
-        # Sorteio.objects.all().delete()
-
-        # Obter todos os apartamentos que não estão atualmente associados a um sorteio
-        apartamentos = list(Apartamento.objects.exclude(sorteio__isnull=True))
-        vagas = list(Vaga.objects.exclude(sorteio__isnull=True))
-
-        # Certifique-se de que existem vagas suficientes para todos os apartamentos
+        # Lógica de sorteio para apartamentos sem presença confirmada
+        apartamentos = list(Apartamento.objects.filter(presenca=False).exclude(sorteio__isnull=False))
+        vagas = list(Vaga.objects.exclude(sorteio__isnull=False))
         if len(vagas) >= len(apartamentos):
             random.shuffle(vagas)
-
             for apartamento in apartamentos:
-                if not apartamento.sorteio_set.exists():  # Verifica se o apartamento já foi sorteado
-                    vaga_selecionada = vagas.pop()
-                    Sorteio.objects.create(
-                        apartamento=apartamento,
-                        vaga=vaga_selecionada
-                    )
+                vaga_selecionada = vagas.pop()
+                Sorteio.objects.create(apartamento=apartamento, vaga=vaga_selecionada)
+
+            request.session['sorteio_iniciado_nc'] = True
+            request.session['horario_conclusao_nc'] = timezone.now().strftime("%d/%m/%Y às %H:%M:%S")
+            messages.success(request, "Sorteio realizado com sucesso!")
         else:
-            # Tratar a situação onde não há vagas suficientes para os apartamentos
             messages.error(request, "Não há vagas suficientes para todos os apartamentos.")
+            request.session['sorteio_iniciado_nc'] = False
 
-        # Armazenar informações do sorteio na sessão
-        request.session['sorteio_iniciado_nc'] = True
-        request.session['horario_conclusao_nc'] = timezone.localtime().strftime("%d/%m/%Y às %Hh e %Mmin e %Ss")
-
-        return redirect('porcelana_aleatorio')
+        return redirect('porcelana_final')  # Isso garante que a página é recarregada com os resultados novos
 
     else:
         sorteio_iniciado_nc = request.session.get('sorteio_iniciado_nc', False)
-        resultados_sorteio_nc = Sorteio.objects.select_related('apartamento', 'vaga').order_by('apartamento__id').all()
-        vagas_atribuidas_nc = resultados_sorteio_nc.exists()  # Verificar se existem resultados
+        if sorteio_iniciado_nc:
+            resultados_sorteio_nc = Sorteio.objects.select_related('apartamento', 'vaga').order_by('apartamento__id')
+        else:
+            resultados_sorteio_nc = None
 
-        return render(request, 'porcelana/porcelana_aleatorio.html', {
+        return render(request, 'porcelana/porcelana_final.html', {
             'resultados_sorteio_nc': resultados_sorteio_nc,
-            'vagas_atribuidas_nc': vagas_atribuidas_nc,
             'sorteio_iniciado_nc': sorteio_iniciado_nc,
             'horario_conclusao_nc': request.session.get('horario_conclusao_nc', '')
         })
