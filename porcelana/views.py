@@ -180,43 +180,146 @@ def porcelana_sorteio(request):
     	return render(request, 'porcelana/porcelana_sorteio.html')
 
 
+# from django.shortcuts import render, redirect
+# from django.contrib import messages
+# from django.contrib.admin.views.decorators import staff_member_required
+# from django.utils import timezone
+# from .models import Apartamento, Vaga, Sorteio
+# import random
+
+# @staff_member_required
+# def porcelana_final(request):
+#     if request.method == 'POST':
+#         apartamentos = list(Apartamento.objects.filter(presenca=False).exclude(sorteio__isnull=False))
+#         vagas = list(Vaga.objects.exclude(sorteio__isnull=False))
+#         if len(vagas) >= len(apartamentos):
+#             random.shuffle(vagas)
+#             for apartamento in apartamentos:
+#                 vaga_selecionada = vagas.pop()
+#                 Sorteio.objects.create(apartamento=apartamento, vaga=vaga_selecionada)
+
+#             request.session['sorteio_iniciado_nc'] = True
+#             request.session['horario_conclusao_nc'] = timezone.now().strftime("%d/%m/%Y às %H:%M:%S")
+#             messages.success(request, "Sorteio realizado com sucesso!")
+#         else:
+#             messages.error(request, "Não há vagas suficientes para todos os apartamentos.")
+#             request.session['sorteio_iniciado_nc'] = False
+
+#         return redirect('porcelana_final')
+
+#     else:
+#         sorteio_iniciado_nc = request.session.pop('sorteio_iniciado_nc', False)
+#         horario_conclusao_nc = request.session.get('horario_conclusao_nc', '')
+#         resultados_sorteio_nc = Sorteio.objects.select_related('apartamento', 'vaga').order_by('apartamento__id') if sorteio_iniciado_nc else None
+
+#         return render(request, 'porcelana/porcelana_final.html', {
+#             'resultados_sorteio_nc': resultados_sorteio_nc,
+#             'sorteio_iniciado_nc': sorteio_iniciado_nc,
+#             'horario_conclusao_nc': horario_conclusao_nc
+#         })
+
+
+
+
+# from django.shortcuts import render, redirect
+# from django.utils import timezone
+# from .models import Apartamento, Vaga, Sorteio
+# import random
+# from django.contrib.admin.views.decorators import staff_member_required
+
+# @staff_member_required
+# def porcelana_final(request):
+#     if request.method == 'POST':
+#         # Limpar registros anteriores de sorteio para apartamentos com presença False
+#         Sorteio.objects.filter(apartamento__presenca=False).delete()
+        
+#         # Obter apartamentos com presença False e todas as vagas disponíveis
+#         apartamentos = list(Apartamento.objects.filter(presenca=False))
+#         vagas_disponiveis = list(Vaga.objects.exclude(id__in=Sorteio.objects.values_list('vaga_id', flat=True)))
+
+#         # Verifica se há vagas suficientes para os apartamentos com presença False
+#         if len(vagas_disponiveis) >= len(apartamentos):
+#             random.shuffle(vagas_disponiveis)
+
+#             for apartamento in apartamentos:
+#                 vaga_selecionada = vagas_disponiveis.pop()
+#                 Sorteio.objects.create(
+#                     apartamento=apartamento, 
+#                     vaga=vaga_selecionada
+#                 )
+#         else:
+#             # Você pode lidar com a situação de não ter vagas suficientes aqui
+#             pass
+        
+#         # Armazenar informações do sorteio na sessão
+#         request.session['sorteio_iniciado_nc'] = True
+#         request.session['horario_conclusao_nc'] = timezone.localtime().strftime("%d/%m/%Y às %Hh e %Mmin e %Ss")
+
+#         return redirect('porcelana_final')
+    
+#     else:
+#         sorteio_iniciado_nc = request.session.get('sorteio_iniciado_nc', False)
+#         resultados_sorteio_nc = Sorteio.objects.select_related('apartamento', 'vaga').order_by('apartamento__id').all()
+#         vagas_atribuidas_nc = resultados_sorteio_nc.exists()  # Verificar se existem resultados
+
+#         return render(request, 'porcelana/porcelana_final.html', {
+#             'resultados_sorteio_nc': resultados_sorteio_nc,
+#             'vagas_atribuidas_nc': vagas_atribuidas_nc,
+#             'sorteio_iniciado_nc': sorteio_iniciado_nc,
+#             'horario_conclusao_nc': request.session.get('horario_conclusao_nc', '')
+#         })
+
+
+
 from django.shortcuts import render, redirect
-from django.contrib import messages
-from django.contrib.admin.views.decorators import staff_member_required
 from django.utils import timezone
 from .models import Apartamento, Vaga, Sorteio
 import random
+from django.contrib.admin.views.decorators import staff_member_required
 
 @staff_member_required
 def porcelana_final(request):
     if request.method == 'POST':
-        # Lógica de sorteio para apartamentos sem presença confirmada
-        apartamentos = list(Apartamento.objects.filter(presenca=False).exclude(sorteio__isnull=False))
-        vagas = list(Vaga.objects.exclude(sorteio__isnull=False))
-        if len(vagas) >= len(apartamentos):
-            random.shuffle(vagas)
+        # Limpar registros anteriores de sorteio para apartamentos com presença False
+        Sorteio.objects.filter(apartamento__presenca=False).delete()
+        
+        # Obter apartamentos com presença False e todas as vagas disponíveis, excluindo as já atribuídas
+        apartamentos = list(Apartamento.objects.filter(presenca=False))
+        vagas_disponiveis = list(Vaga.objects.exclude(id__in=Sorteio.objects.values_list('vaga_id', flat=True)))
+
+        # Verifica se há vagas suficientes para os apartamentos com presença False
+        if len(vagas_disponiveis) >= len(apartamentos):
+            random.shuffle(vagas_disponiveis)
+
             for apartamento in apartamentos:
-                vaga_selecionada = vagas.pop()
-                Sorteio.objects.create(apartamento=apartamento, vaga=vaga_selecionada)
-
-            request.session['sorteio_iniciado_nc'] = True
-            request.session['horario_conclusao_nc'] = timezone.now().strftime("%d/%m/%Y às %H:%M:%S")
-            messages.success(request, "Sorteio realizado com sucesso!")
+                vaga_selecionada = vagas_disponiveis.pop()
+                Sorteio.objects.create(
+                    apartamento=apartamento, 
+                    vaga=vaga_selecionada
+                )
         else:
-            messages.error(request, "Não há vagas suficientes para todos os apartamentos.")
-            request.session['sorteio_iniciado_nc'] = False
+            # Opção para lidar com a situação de não ter vagas suficientes
+            pass
+        
+        # Armazenar informações do sorteio na sessão
+        request.session['sorteio_iniciado_nc'] = True
+        request.session['horario_conclusao_nc'] = timezone.localtime().strftime("%d/%m/%Y às %Hh e %Mmin e %Ss")
 
-        return redirect('porcelana_final')  # Isso garante que a página é recarregada com os resultados novos
-
+        return redirect('porcelana_final')
+    
     else:
         sorteio_iniciado_nc = request.session.get('sorteio_iniciado_nc', False)
-        if sorteio_iniciado_nc:
-            resultados_sorteio_nc = Sorteio.objects.select_related('apartamento', 'vaga').order_by('apartamento__id')
-        else:
-            resultados_sorteio_nc = None
+        todos_apartamentos = Apartamento.objects.count()  # Conta todos os apartamentos registrados
+        apartamentos_sorteio = Sorteio.objects.count()  # Conta todos os apartamentos com vagas atribuídas
+        vagas_atribuidas_completas = todos_apartamentos == apartamentos_sorteio  # Verifica se todos têm vagas atribuídas
+
+        resultados_sorteio_nc = Sorteio.objects.select_related('apartamento', 'vaga').order_by('apartamento__id').all()
+        vagas_atribuidas_nc = resultados_sorteio_nc.exists()  # Verificar se existem resultados
 
         return render(request, 'porcelana/porcelana_final.html', {
             'resultados_sorteio_nc': resultados_sorteio_nc,
+            'vagas_atribuidas_nc': vagas_atribuidas_nc,
             'sorteio_iniciado_nc': sorteio_iniciado_nc,
-            'horario_conclusao_nc': request.session.get('horario_conclusao_nc', '')
+            'horario_conclusao_nc': request.session.get('horario_conclusao_nc', ''),
+            'vagas_atribuidas_completas': vagas_atribuidas_completas  # Adiciona essa variável ao contexto
         })

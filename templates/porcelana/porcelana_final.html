@@ -1,4 +1,4 @@
-{% extends 'porcelana/porcelana_base2.html' %}
+{% extends 'chacara_bom_sucesso/cbs_base.html' %}
 {% load static %}
 {% block content %}
 
@@ -17,44 +17,39 @@
             </form>
         </div>
 
-        <!-- Container da Animação, oculto inicialmente e mostrado apenas após o clique no botão Iniciar -->
-        <div class="loading-container" id="loadingContainer" style="display: none;">                          
+        {% if vagas_atribuidas_completas %}
+        <div class="loading-container" id="loadingContainer">                          
             <div class="loading">
                 <img src="{% static '/assets/images/sorteio2.gif' %}" alt="Sorteando..." class="loading-gif mt-5">
             </div>
         </div>
-
-        {% if sorteio_iniciado_nc %}
-            <!-- Seções que mostram os resultados do sorteio -->
-            {% if resultados_sorteio_nc %}
-            <div class="resultados mt-4">
-                <h2 class="text-center mb-4">Resultados do Sorteio</h2>
-                {% for sorteio in resultados_sorteio_nc %}
-                <div class="row g-3 mt-3 linha-apartamento">
-                    <div class="col-sm-4">
-                        <label class="form-label text-dark">Apartamento</label>
-                        <input type="text" class="form-control" value="{{ sorteio.apartamento.numero_apartamento }}" readonly>
-                    </div>
-                    <div class="col-sm-4">
-                        <label class="form-label text-dark">Vaga</label>
-                        <input type="text" class="form-control" value="{{ sorteio.vaga.vaga }}" readonly>
-                    </div>
+        
+        
+        <div class="resultados mt-4">
+            <h2 class="text-center mb-4">Resultados do Sorteio</h2>
+            {% for sorteio in resultados_sorteio_nc %}
+            <div class="row g-3 mt-3 linha-apartamento">
+                <div class="col-sm-4">
+                    <label class="form-label text-dark">Apartamento</label>
+                    <input type="text" class="form-control" value="{{ sorteio.apartamento.numero_apartamento }}" readonly>
                 </div>
-                {% endfor %}
+                <div class="col-sm-4">
+                    <label class="form-label text-dark">Vaga</label>
+                    <input type="text" class="form-control" value="{{ sorteio.vaga.vaga }}" readonly>
+                </div>
             </div>
-            <div class="text-center text-dark mt-5 mb-5">
-                <h5>Sorteio finalizado {{ request.session.horario_conclusao_nc }}.</h5>
-                <a href="{% url 'excel_porcelana' %}" class="btn btn-info mt-3">Exportar para Excel</a>
-            </div>
-            <div class="text-center mt-5">
-                <img src="{% static '/assets/images/qrcode.png' %}" alt="QR Code" style="max-width: 200px;"/>
-                <p class="text-dark">Escaneie o QR Code para acessar seu resultado.</p>
-            </div>
-            {% else %}
-            <div class="text-center mt-5">
-                <p>Nenhum resultado disponível. O sorteio está em andamento.</p>
-            </div>
-            {% endif %}
+            {% endfor %}
+        </div>
+        
+        
+        <div class="text-center text-dark mt-5 mb-5">
+            <h5>Sorteio finalizado {{ request.session.horario_conclusao_nc }}.</h5>
+            <a href="{% url 'excel_porcelana' %}" class="btn btn-info mt-3">Exportar para Excel</a>
+        </div>
+        <div class="text-center mt-5">
+            <img src="{% static '/assets/images/qrcode.png' %}" alt="QR Code" style="max-width: 200px;"/>
+            <p class="text-dark">Escaneie o QR Code para acessar seu resultado.</p>
+        </div>
         {% endif %}
     </div>
 </main>
