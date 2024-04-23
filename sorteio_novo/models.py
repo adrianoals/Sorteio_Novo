@@ -28,8 +28,3 @@ class ListaDePresenca(models.Model):
         return f'{self.apartamento} - {self.bloco}'
 
 
-
-# python manage.py makemigrations
-# python manage.py migrate
-    
-

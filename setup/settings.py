@@ -45,9 +45,6 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles', 
     'sorteio_novo.apps.SorteioNovoConfig',
-    'sorteio_novo_institucional.apps.SorteioNovoInstitucionalConfig',
-    'chacara_bom_sucesso.apps.ChacaraBomSucessoConfig',
-    'nova_colina.apps.NovaColinaConfig',
     'assincon.apps.AssinconConfig',
     'porcelana.apps.PorcelanaConfig',
 ]

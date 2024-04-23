@@ -9,8 +9,9 @@
             integrity="sha384-1BmE4kWBq78iYhFldvKuhfTAU6auU8tT94WrHftjDbrCEXSU1oBoqyl2QvZ6jIW3" crossorigin="anonymous">
         
         <!-- Minha CSS -->
-        <link rel="stylesheet" href="{% static '/styles/style_institucional.css' %}">
+        <link rel="stylesheet" href="{% static '/styles/style_bom_sucesso.css' %}">
 
+        
         <!-- Fonte google -->
         <link rel="preconnect" href="https://fonts.googleapis.com">
         <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -21,17 +22,16 @@
         <!-- Logo e Título -->
         <link rel="shortcut icon" href="{% static '/assets/images/Logo-500x500.ico' %}" type="image/x-icon">
         <title>Sorteio Novo</title>
-        
     </head>
     
     <body>
-        {% include 'sorteio_novo_institucional/partials/_menu.html' %}
+        {% include 'sorteio_novo/partials/_menu.html' %}
         {% block content %}{% endblock %}
-        {% include 'sorteio_novo_institucional/partials/_footer.html' %}
+        {% include 'sorteio_novo/partials/_footer.html' %}
         
         <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-C6RzsynM9kWDrMNeT87bh95OGNyZPhcTNXj1NW7RuBCsyN/o0jlpcV8Qyq46cDfL" crossorigin="anonymous"></script>
         <!-- Javascript-->
-        {% comment %} <script src="{% static '/js/app.js' %}"></script>  {% endcomment %}
+        <script src="{% static '/js/app.js' %}"></script> 
     </body>
     
 </html>

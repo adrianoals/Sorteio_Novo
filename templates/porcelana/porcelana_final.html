@@ -1,4 +1,4 @@
-{% extends 'chacara_bom_sucesso/cbs_base.html' %}
+{% extends 'sorteio_novo/base_sorteio.html' %}
 {% load static %}
 {% block content %}
 
@@ -47,7 +47,7 @@
             <a href="{% url 'excel_porcelana' %}" class="btn btn-info mt-3">Exportar para Excel</a>
         </div>
         <div class="text-center mt-5">
-            <img src="{% static '/assets/images/qrcode.png' %}" alt="QR Code" style="max-width: 200px;"/>
+            <img src="{% static '/assets/images/porcelana_qrcode.png' %}" alt="QR Code" style="max-width: 200px;"/>
             <p class="text-dark">Escaneie o QR Code para acessar seu resultado.</p>
         </div>
         {% endif %}
