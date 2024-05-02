@@ -138,8 +138,6 @@ def lyon(request):
         })
 
 
-
-
 @staff_member_required
 def lyon_zerar(request):
     if request.method == 'POST':
@@ -244,7 +242,7 @@ def lyon_moto_zerar(request):
 
 
 def lyon_moto_excel(request):
-    caminho_modelo = 'static/assets/modelos/sorteio_lyon.xlsx'
+    caminho_modelo = 'static/assets/modelos/sorteio_lyon_moto.xlsx'
 
     wb = load_workbook(caminho_modelo)
     ws = wb.active
