@@ -6,6 +6,7 @@ urlpatterns = [
 	path('', include('sorteio_novo.urls')), 
     path('', include('assincon.urls')), 
     path('', include('porcelana.urls')), 
+    path('', include('lyon.urls')), 
 ]
 
 
