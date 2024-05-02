@@ -32,11 +32,11 @@
             <div class="row g-3 mt-3 linha-apartamento">
                 <div class="col-sm-4">
                     <label class="form-label text-dark">Apartamento</label>
-                    <input type="text" class="form-control" value="{{ sorteiomoto.apartamentomoto.numero_apartamento }}" readonly>
+                    <input type="text" class="form-control" value="{{ sorteio.apartamento.numero_apartamento }}" readonly>
                 </div>
                 <div class="col-sm-4">
                     <label class="form-label text-dark">Vaga</label>
-                    <input type="text" class="form-control" value="{{ sorteiomoto.vagamoto.vaga }}" readonly>
+                    <input type="text" class="form-control" value="{{ sorteio.vaga.vaga }}" readonly>
                 </div>
             </div>
             {% endfor %}
@@ -62,5 +62,3 @@
 </main>
 
 {% endblock %}
-
-

@@ -41,8 +41,8 @@ class VagaMoto(models.Model):
 
 
 class SorteioMoto(models.Model):
-    apartamento = models.OneToOneField(Apartamento, on_delete=models.CASCADE)
-    vaga = models.OneToOneField(Vaga, on_delete=models.CASCADE)
+    apartamento = models.OneToOneField(ApartamentoMoto, on_delete=models.CASCADE)
+    vaga = models.OneToOneField(VagaMoto, on_delete=models.CASCADE)
 
     def __str__(self):
         # Acesso ao bloco através do apartamento

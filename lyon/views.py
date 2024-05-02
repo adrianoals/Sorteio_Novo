@@ -190,37 +190,37 @@ def lyon_qrcode(request):
     })
 
 
+from django.shortcuts import redirect, render
+from django.utils import timezone
+from .models import ApartamentoMoto, VagaMoto, SorteioMoto
+from django.contrib.admin.views.decorators import staff_member_required
+import random
 
 @staff_member_required
 def lyon_moto(request):
     if request.method == 'POST':
         # Limpar registros anteriores de sorteio
         SorteioMoto.objects.all().delete()
-        
+
         # Obter todos os apartamentos e grupos de vagas
         apartamentos = list(ApartamentoMoto.objects.all())
         vagas = list(VagaMoto.objects.all())
 
-        # Certifique-se de que existem vagas suficientes para todos os apartamentos
-        if len(vagas) >= len(apartamentos):
-            random.shuffle(vagas)
+        # Misturar listas para aleatoriedade
+        random.shuffle(apartamentos)
+        random.shuffle(vagas)
 
-            for apartamento in apartamentos:
-                vaga_selecionada = vagas.pop()
-                SorteioMoto.objects.create(
-                    apartamento=apartamento, 
-                    vaga=vaga_selecionada
-                )
-        else:
-           
-            pass
-        
+        # Sortear até que um dos dois seja esgotado
+        while apartamentos and vagas:
+            apartamento = apartamentos.pop()
+            vaga = vagas.pop()
+            SorteioMoto.objects.create(apartamento=apartamento, vaga=vaga)
+
         # Armazenar informações do sorteio na sessão
         request.session['sorteio_iniciado_nc'] = True
         request.session['horario_conclusao_nc'] = timezone.localtime().strftime("%d/%m/%Y às %Hh e %Mmin e %Ss")
 
         return redirect('lyon_moto')
-    
     else:
         sorteio_iniciado_nc = request.session.get('sorteio_iniciado_nc', False)
         resultados_sorteio_nc = SorteioMoto.objects.select_related('apartamento', 'vaga').order_by('apartamento__id').all()
@@ -232,12 +232,12 @@ def lyon_moto(request):
             'sorteio_iniciado_nc': sorteio_iniciado_nc,
             'horario_conclusao_nc': request.session.get('horario_conclusao_nc', '')
         })
-    
+
 
 @staff_member_required
 def lyon_moto_zerar(request):
     if request.method == 'POST':
-        Sorteio.objects.all().delete()
+        SorteioMoto.objects.all().delete()
         return redirect('lyon_moto')
     else:
         return render(request, 'lyon/lyon_moto_zerar.html')
@@ -275,7 +275,7 @@ def lyon_moto_qrcode(request):
     numero_apartamento = request.GET.get('apartamento')
     resultados_filtrados = None
     if numero_apartamento:
-        resultados_filtrados = Sorteio.objects.filter(apartamento__numero_apartamento=numero_apartamento)
+        resultados_filtrados = SorteioMoto.objects.filter(apartamento__numero_apartamento=numero_apartamento)
     
     return render(request, 'lyon/lyon_moto_qrcode.html', {
         'resultados_filtrados': resultados_filtrados,

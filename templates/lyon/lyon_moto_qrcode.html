@@ -15,7 +15,7 @@
             <div class="col-md-6 text-center text-dark">
                     <h1 class="mt-5 mb-5">Selecione seu apartamento!</h1>
                     <div class="filtro-apartamento text-center mb-5">
-                        <form method="get" action="{% url 'lyon__moto_qrcode' %}">
+                        <form method="get" action="{% url 'lyon_moto_qrcode' %}">
                             <select id="numeroApartamento" name="apartamento" class="form-select filtro-destacado">
                                 <option value="" disabled {% if not apartamento_selecionado %}selected{% endif %}>Selecione seu apartamento</option>
                                 {% for apt in apartamentos_disponiveis %}
