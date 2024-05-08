@@ -7,6 +7,7 @@ urlpatterns = [
     path('', include('assincon.urls')), 
     path('', include('porcelana.urls')), 
     path('', include('lyon.urls')), 
+    path('', include('helbor.urls')), 
 ]
 
 
