@@ -144,7 +144,8 @@ def helbor_torre1(request):
             'Torre 1 - Apartamento 114': 'Grupo 76 - Vagas (447, 448, 346) - Pavimento: 1',
             'Torre 1 - Apartamento 144': 'Grupo 83 - Vagas (461, 462, 353) - Pavimento: 1',
             'Torre 1 - Apartamento 164': 'Grupo 10 - Vagas (51, 52, 134) - Pavimento: 3',
-            'Torre 1 - Apartamento 204': 'Grupo 84 - Vagas (463, 464, 465) - Pavimento: 1'
+            'Torre 1 - Apartamento 204': 'Grupo 84 - Vagas (463, 464, 465) - Pavimento: 1', 
+            'Torre 1 - Apartamento 72': 'Grupo 30 - Vagas (186, 187, 288) - Pavimento: 2'
         }
 
         # Atribuir as vagas predefinidas
