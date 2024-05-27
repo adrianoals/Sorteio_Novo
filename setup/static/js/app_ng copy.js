@@ -30,8 +30,6 @@ document.addEventListener('DOMContentLoaded', function () {
     const formSortear = document.querySelector('#sortearForm');
     const formSortearNovamente = document.querySelector('#sortearNovamenteForm');
     const formConfirmarVagas = document.querySelector('#confirmarVagasForm');
-    const formSortearBlocos = document.querySelector('#sortearBlocosForm');
-    const formSortearBlocosNovamente = document.querySelector('#sortearBlocosNovamenteForm');
 
     function updateVagaOptions() {
         console.log("Atualizando opções de vagas.");
@@ -48,15 +46,13 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     }
 
-    if (selects.length > 0) {
-        selects.forEach(select => {
-            select.addEventListener('change', function () {
-                updateVagaOptions();
-            });
+    selects.forEach(select => {
+        select.addEventListener('change', function () {
+            updateVagaOptions();
         });
+    });
 
-        updateVagaOptions();
-    }
+    updateVagaOptions();
 
     if (formSortear) {
         formSortear.addEventListener('submit', function(event) {
@@ -77,20 +73,6 @@ document.addEventListener('DOMContentLoaded', function () {
             // Garantir que o formulário de confirmação não acione a animação
             document.getElementById('loadingAnimation').style.display = 'none';
             document.getElementById('loadingAnimationNovamente').style.display = 'none';
-        });
-    }
-
-    if (formSortearBlocos) {
-        formSortearBlocos.addEventListener('submit', function(event) {
-            event.preventDefault(); // Previne o comportamento padrão do botão
-            iniciarSorteio('sortearBlocosForm', 'loadingAnimation');
-        });
-    }
-
-    if (formSortearBlocosNovamente) {
-        formSortearBlocosNovamente.addEventListener('submit', function(event) {
-            event.preventDefault(); // Previne o comportamento padrão do botão
-            iniciarSorteio('sortearBlocosNovamenteForm', 'loadingAnimation');
         });
     }
 });

@@ -278,15 +278,104 @@ def ng_final(request):
         })
 
 
+# @staff_member_required
+# def ng_adimplentes(request):
+#     # Seleciona todos os apartamentos adimplentes com presença confirmada e que ainda não têm vaga sorteada
+#     apartamentos_adimplentes = list(Apartamento.objects.filter(presenca=True, adimplentes=True).exclude(sorteio__apartamento__isnull=False))
+#     # Seleciona todas as vagas que ainda não estão em um sorteio
+#     vagas_disponiveis = list(Vaga.objects.exclude(sorteio__vaga__isnull=False))
+
+#     sorteio_finalizado = not apartamentos_adimplentes or not vagas_disponiveis
+#     lista_de_presenca = []
+
+#     if request.method == 'POST':
+#         if 'confirmar_vagas' in request.POST:
+#             for key, value in request.POST.items():
+#                 if key.startswith('apartamento_'):
+#                     apartamento_id = key.split('_')[1]
+#                     apartamento = Apartamento.objects.get(id=apartamento_id)
+#                     vaga = Vaga.objects.get(vaga=value)
+#                     # Cria um novo registro de sorteio associando o apartamento à vaga escolhida
+#                     novo_sorteio = Sorteio(apartamento=apartamento, vaga=vaga)
+#                     novo_sorteio.save()
+#             messages.success(request, 'Vagas confirmadas com sucesso!')
+#             return redirect('ng_adimplentes')
+
+#         if 'realizar_sorteio' in request.POST:
+#             random.shuffle(apartamentos_adimplentes)
+#             lista_de_presenca = apartamentos_adimplentes
+
+#             return render(request, 'nova_guarulhos/ng_adimplentes.html', {
+#                 'sorteio_finalizado': sorteio_finalizado,
+#                 'vagas_disponiveis': vagas_disponiveis,
+#                 'lista_de_presenca': lista_de_presenca
+#             })
+
+#     return render(request, 'nova_guarulhos/ng_adimplentes.html', {
+#         'sorteio_finalizado': sorteio_finalizado,
+#         'vagas_disponiveis': vagas_disponiveis,
+#         'lista_de_presenca': lista_de_presenca
+#     })
+
+
+
+# @staff_member_required
+# def ng_blocos(request):
+#     # Seleciona os blocos dos apartamentos adimplentes e presentes que ainda têm vagas a serem atribuídas
+#     blocos = list(Apartamento.objects.filter(presenca=True, adimplentes=True, sorteio__isnull=True).values_list('bloco', flat=True).distinct())
+
+#     sorteio_realizado = False
+#     ordem_blocos = request.session.get('ordem_blocos', [])
+
+#     if request.method == 'POST':
+#         if 'realizar_sorteio' in request.POST:
+#             random.shuffle(blocos)
+#             request.session['ordem_blocos'] = blocos
+#             sorteio_realizado = True
+#         elif 'sortear_novamente' in request.POST:
+#             random.shuffle(blocos)
+#             request.session['ordem_blocos'] = blocos
+#             sorteio_realizado = True
+
+#     return render(request, 'nova_guarulhos/ng_blocos.html', {
+#         'blocos': blocos,
+#         'ordem_blocos': ordem_blocos,
+#         'sorteio_realizado': sorteio_realizado
+#     })
+
+@staff_member_required
+def ng_blocos(request):
+    blocos = list(Apartamento.objects.filter(presenca=True, adimplentes=True, sorteio__isnull=True).values_list('bloco', flat=True).distinct())
+
+    sorteio_realizado = False
+    ordem_blocos = request.session.get('ordem_blocos', [])
+
+    if request.method == 'POST':
+        random.shuffle(blocos)
+        request.session['ordem_blocos'] = blocos
+        sorteio_realizado = True
+
+    return render(request, 'nova_guarulhos/ng_blocos.html', {
+        'blocos': blocos,
+        'ordem_blocos': ordem_blocos,
+        'sorteio_realizado': sorteio_realizado
+    })
+
+
 @staff_member_required
 def ng_adimplentes(request):
-    # Seleciona todos os apartamentos adimplentes com presença confirmada e que ainda não têm vaga sorteada
-    apartamentos_adimplentes = list(Apartamento.objects.filter(presenca=True, adimplentes=True).exclude(sorteio__apartamento__isnull=False))
-    # Seleciona todas as vagas que ainda não estão em um sorteio
-    vagas_disponiveis = list(Vaga.objects.exclude(sorteio__vaga__isnull=False))
+    ordem_blocos = request.session.get('ordem_blocos', [])
+    apartamentos_adimplentes = []
 
+    # Mantém a ordem dos blocos e sorteia aleatoriamente os apartamentos dentro de cada bloco
+    for bloco in ordem_blocos:
+        apartamentos_do_bloco = list(Apartamento.objects.filter(presenca=True, adimplentes=True, bloco=bloco).exclude(sorteio__apartamento__isnull=False))
+        random.shuffle(apartamentos_do_bloco)
+        apartamentos_adimplentes.extend(apartamentos_do_bloco)
+
+    vagas_disponiveis = list(Vaga.objects.exclude(sorteio__vaga__isnull=False))
     sorteio_finalizado = not apartamentos_adimplentes or not vagas_disponiveis
-    lista_de_presenca = []
+    lista_de_presenca = apartamentos_adimplentes if 'realizar_sorteio' in request.POST else []
 
     if request.method == 'POST':
         if 'confirmar_vagas' in request.POST:
@@ -295,24 +384,14 @@ def ng_adimplentes(request):
                     apartamento_id = key.split('_')[1]
                     apartamento = Apartamento.objects.get(id=apartamento_id)
                     vaga = Vaga.objects.get(vaga=value)
-                    # Cria um novo registro de sorteio associando o apartamento à vaga escolhida
                     novo_sorteio = Sorteio(apartamento=apartamento, vaga=vaga)
                     novo_sorteio.save()
             messages.success(request, 'Vagas confirmadas com sucesso!')
             return redirect('ng_adimplentes')
 
-        if 'realizar_sorteio' in request.POST:
-            random.shuffle(apartamentos_adimplentes)
-            lista_de_presenca = apartamentos_adimplentes
-
-            return render(request, 'nova_guarulhos/ng_adimplentes.html', {
-                'sorteio_finalizado': sorteio_finalizado,
-                'vagas_disponiveis': vagas_disponiveis,
-                'lista_de_presenca': lista_de_presenca
-            })
-
     return render(request, 'nova_guarulhos/ng_adimplentes.html', {
         'sorteio_finalizado': sorteio_finalizado,
         'vagas_disponiveis': vagas_disponiveis,
-        'lista_de_presenca': lista_de_presenca
+        'lista_de_presenca': lista_de_presenca,
+        'ordem_blocos': ordem_blocos,
     })
