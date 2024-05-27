@@ -185,6 +185,52 @@ def ng_apartamento(request):
 
 
 @staff_member_required
+def ng_pcd(request):
+    # Seleciona todos os apartamentos com presença confirmada e que ainda não têm vaga sorteada
+    apartamentos_pcd = list(Apartamento.objects.filter(presenca=True, pcd=True).exclude(sorteio__apartamento__isnull=False))
+    apartamentos_idoso = list(Apartamento.objects.filter(presenca=True, idoso=True, pcd=False).exclude(sorteio__apartamento__isnull=False))
+    # Seleciona todas as vagas que ainda não estão em um sorteio
+    vagas_disponiveis = list(Vaga.objects.exclude(sorteio__vaga__isnull=False))
+
+    sorteio_finalizado = not (apartamentos_pcd or apartamentos_idoso) or not vagas_disponiveis
+    lista_de_presenca = []
+
+    if request.method == 'POST':
+        if 'confirmar_vagas' in request.POST:
+            for key, value in request.POST.items():
+                if key.startswith('apartamento_'):
+                    apartamento_id = key.split('_')[1]
+                    apartamento = Apartamento.objects.get(id=apartamento_id)
+                    vaga = Vaga.objects.get(vaga=value)
+                    # Cria um novo registro de sorteio associando o apartamento à vaga escolhida
+                    novo_sorteio = Sorteio(apartamento=apartamento, vaga=vaga)
+                    novo_sorteio.save()
+            messages.success(request, 'Vagas confirmadas com sucesso!')
+            return redirect('ng_pcd')
+
+        if 'realizar_sorteio' in request.POST:
+            random.shuffle(apartamentos_pcd)
+            random.shuffle(apartamentos_idoso)
+            lista_de_presenca = apartamentos_pcd + apartamentos_idoso
+
+            return render(request, 'nova_guarulhos/ng_pcd.html', {
+                'sorteio_finalizado': sorteio_finalizado,
+                'vagas_disponiveis': vagas_disponiveis,
+                'lista_de_presenca': lista_de_presenca
+            })
+
+    return render(request, 'nova_guarulhos/ng_pcd.html', {
+        'sorteio_finalizado': sorteio_finalizado,
+        'vagas_disponiveis': vagas_disponiveis,
+        'lista_de_presenca': lista_de_presenca
+    })
+
+
+
+
+
+
+@staff_member_required
 def ng_final(request):
     if request.method == 'POST':
         # Limpar registros anteriores de sorteio para apartamentos com presença False
@@ -230,3 +276,43 @@ def ng_final(request):
             'horario_conclusao_nc': request.session.get('horario_conclusao_nc', ''),
             'vagas_atribuidas_completas': vagas_atribuidas_completas  # Adiciona essa variável ao contexto
         })
+
+
+@staff_member_required
+def ng_adimplentes(request):
+    # Seleciona todos os apartamentos adimplentes com presença confirmada e que ainda não têm vaga sorteada
+    apartamentos_adimplentes = list(Apartamento.objects.filter(presenca=True, adimplentes=True).exclude(sorteio__apartamento__isnull=False))
+    # Seleciona todas as vagas que ainda não estão em um sorteio
+    vagas_disponiveis = list(Vaga.objects.exclude(sorteio__vaga__isnull=False))
+
+    sorteio_finalizado = not apartamentos_adimplentes or not vagas_disponiveis
+    lista_de_presenca = []
+
+    if request.method == 'POST':
+        if 'confirmar_vagas' in request.POST:
+            for key, value in request.POST.items():
+                if key.startswith('apartamento_'):
+                    apartamento_id = key.split('_')[1]
+                    apartamento = Apartamento.objects.get(id=apartamento_id)
+                    vaga = Vaga.objects.get(vaga=value)
+                    # Cria um novo registro de sorteio associando o apartamento à vaga escolhida
+                    novo_sorteio = Sorteio(apartamento=apartamento, vaga=vaga)
+                    novo_sorteio.save()
+            messages.success(request, 'Vagas confirmadas com sucesso!')
+            return redirect('ng_adimplentes')
+
+        if 'realizar_sorteio' in request.POST:
+            random.shuffle(apartamentos_adimplentes)
+            lista_de_presenca = apartamentos_adimplentes
+
+            return render(request, 'nova_guarulhos/ng_adimplentes.html', {
+                'sorteio_finalizado': sorteio_finalizado,
+                'vagas_disponiveis': vagas_disponiveis,
+                'lista_de_presenca': lista_de_presenca
+            })
+
+    return render(request, 'nova_guarulhos/ng_adimplentes.html', {
+        'sorteio_finalizado': sorteio_finalizado,
+        'vagas_disponiveis': vagas_disponiveis,
+        'lista_de_presenca': lista_de_presenca
+    })
