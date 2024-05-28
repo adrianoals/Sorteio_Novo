@@ -10,9 +10,14 @@ class VagaAdmin(admin.ModelAdmin):
     list_display = ('id', 'vaga')
     list_display_links = ('id', 'vaga')
 
+
 class SorteioAdmin(admin.ModelAdmin):
-    list_display = ('id', 'apartamento', 'vaga')
+    list_display = ('id', 'get_bloco', 'apartamento', 'vaga')
     list_display_links = ('id', 'apartamento', 'vaga')
+
+    def get_bloco(self, obj):
+        return obj.apartamento.bloco
+    get_bloco.short_description = 'Bloco'
 
 
 admin.site.register(Apartamento, ApartamentoAdmin)

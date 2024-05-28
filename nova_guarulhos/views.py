@@ -63,45 +63,45 @@ def ng_zerar(request):
         return render(request, 'nova_guarulhos/ng_zerar.html')
 
 
-def ng_excel(request):
-    caminho_modelo = 'static/assets/modelos/sorteio_porcelana.xlsx'
+# def ng_excel(request):
+#     caminho_modelo = 'static/assets/modelos/sorteio_porcelana.xlsx'
 
-    wb = load_workbook(caminho_modelo)
-    ws = wb.active
+#     wb = load_workbook(caminho_modelo)
+#     ws = wb.active
 
-    # Ordenar os resultados do sorteio pelo ID do apartamento
-    resultados_sorteio_nc = Sorteio.objects.select_related('apartamento', 'vaga').order_by('apartamento__id').all()
+#     # Ordenar os resultados do sorteio pelo ID do apartamento
+#     resultados_sorteio_nc = Sorteio.objects.select_related('apartamento', 'vaga').order_by('apartamento__id').all()
 
-    horario_conclusao_nc = request.session.get('horario_conclusao_nc', 'Horário não disponível')
-    ws['C8'] = f"Sorteio realizado em: {horario_conclusao_nc}"
+#     horario_conclusao_nc = request.session.get('horario_conclusao_nc', 'Horário não disponível')
+#     ws['C8'] = f"Sorteio realizado em: {horario_conclusao_nc}"
 
-    linha = 10
-    for sorteio in resultados_sorteio_nc:
-        ws[f'C{linha}'] = sorteio.apartamento.numero_apartamento
-        ws[f'E{linha}'] = sorteio.vaga.vaga
-        linha += 1
+#     linha = 10
+#     for sorteio in resultados_sorteio_nc:
+#         ws[f'C{linha}'] = sorteio.apartamento.numero_apartamento
+#         ws[f'E{linha}'] = sorteio.vaga.vaga
+#         linha += 1
 
-    response = HttpResponse(content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
-    nome_arquivo = "resultado_sorteio.xlsx"
-    response['Content-Disposition'] = f'attachment; filename={nome_arquivo}'
+#     response = HttpResponse(content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
+#     nome_arquivo = "resultado_sorteio.xlsx"
+#     response['Content-Disposition'] = f'attachment; filename={nome_arquivo}'
 
-    wb.save(response)
+#     wb.save(response)
 
-    return response
+#     return response
 
 
-def ng_qrcode(request):
-    apartamentos_disponiveis = Apartamento.objects.all()  # Adiciona esta linha
-    numero_apartamento = request.GET.get('apartamento')
-    resultados_filtrados = None
-    if numero_apartamento:
-        resultados_filtrados = Sorteio.objects.filter(apartamento__numero_apartamento=numero_apartamento)
+# def ng_qrcode(request):
+#     apartamentos_disponiveis = Apartamento.objects.all()  # Adiciona esta linha
+#     numero_apartamento = request.GET.get('apartamento')
+#     resultados_filtrados = None
+#     if numero_apartamento:
+#         resultados_filtrados = Sorteio.objects.filter(apartamento__numero_apartamento=numero_apartamento)
     
-    return render(request, 'porcelana/porcelana_qrcode.html', {
-        'resultados_filtrados': resultados_filtrados,
-        'apartamento_selecionado': numero_apartamento,
-        'apartamentos_disponiveis': apartamentos_disponiveis,  # Certifique-se de adicionar esta linha
-    })
+#     return render(request, 'porcelana/porcelana_qrcode.html', {
+#         'resultados_filtrados': resultados_filtrados,
+#         'apartamento_selecionado': numero_apartamento,
+#         'apartamentos_disponiveis': apartamentos_disponiveis,  # Certifique-se de adicionar esta linha
+#     })
 
 
 @staff_member_required
@@ -226,137 +226,23 @@ def ng_pcd(request):
     })
 
 
-
-
-
-
-@staff_member_required
-def ng_final(request):
-    if request.method == 'POST':
-        # Limpar registros anteriores de sorteio para apartamentos com presença False
-        Sorteio.objects.filter(apartamento__presenca=False).delete()
-        
-        # Obter apartamentos com presença False e todas as vagas disponíveis, excluindo as já atribuídas
-        apartamentos = list(Apartamento.objects.filter(presenca=False))
-        vagas_disponiveis = list(Vaga.objects.exclude(id__in=Sorteio.objects.values_list('vaga_id', flat=True)))
-
-        # Verifica se há vagas suficientes para os apartamentos com presença False
-        if len(vagas_disponiveis) >= len(apartamentos):
-            random.shuffle(vagas_disponiveis)
-
-            for apartamento in apartamentos:
-                vaga_selecionada = vagas_disponiveis.pop()
-                Sorteio.objects.create(
-                    apartamento=apartamento, 
-                    vaga=vaga_selecionada
-                )
-        else:
-            # Opção para lidar com a situação de não ter vagas suficientes
-            pass
-        
-        # Armazenar informações do sorteio na sessão
-        request.session['sorteio_iniciado_nc'] = True
-        request.session['horario_conclusao_nc'] = timezone.localtime().strftime("%d/%m/%Y às %Hh e %Mmin e %Ss")
-
-        return redirect('ng_final')
-    
-    else:
-        sorteio_iniciado_nc = request.session.get('sorteio_iniciado_nc', False)
-        todos_apartamentos = Apartamento.objects.count()  # Conta todos os apartamentos registrados
-        apartamentos_sorteio = Sorteio.objects.count()  # Conta todos os apartamentos com vagas atribuídas
-        vagas_atribuidas_completas = todos_apartamentos == apartamentos_sorteio  # Verifica se todos têm vagas atribuídas
-
-        resultados_sorteio_nc = Sorteio.objects.select_related('apartamento', 'vaga').order_by('apartamento__id').all()
-        vagas_atribuidas_nc = resultados_sorteio_nc.exists()  # Verificar se existem resultados
-
-        return render(request, 'nova_guarulhos/ng_final.html', {
-            'resultados_sorteio_nc': resultados_sorteio_nc,
-            'vagas_atribuidas_nc': vagas_atribuidas_nc,
-            'sorteio_iniciado_nc': sorteio_iniciado_nc,
-            'horario_conclusao_nc': request.session.get('horario_conclusao_nc', ''),
-            'vagas_atribuidas_completas': vagas_atribuidas_completas  # Adiciona essa variável ao contexto
-        })
-
-
-# @staff_member_required
-# def ng_adimplentes(request):
-#     # Seleciona todos os apartamentos adimplentes com presença confirmada e que ainda não têm vaga sorteada
-#     apartamentos_adimplentes = list(Apartamento.objects.filter(presenca=True, adimplentes=True).exclude(sorteio__apartamento__isnull=False))
-#     # Seleciona todas as vagas que ainda não estão em um sorteio
-#     vagas_disponiveis = list(Vaga.objects.exclude(sorteio__vaga__isnull=False))
-
-#     sorteio_finalizado = not apartamentos_adimplentes or not vagas_disponiveis
-#     lista_de_presenca = []
-
-#     if request.method == 'POST':
-#         if 'confirmar_vagas' in request.POST:
-#             for key, value in request.POST.items():
-#                 if key.startswith('apartamento_'):
-#                     apartamento_id = key.split('_')[1]
-#                     apartamento = Apartamento.objects.get(id=apartamento_id)
-#                     vaga = Vaga.objects.get(vaga=value)
-#                     # Cria um novo registro de sorteio associando o apartamento à vaga escolhida
-#                     novo_sorteio = Sorteio(apartamento=apartamento, vaga=vaga)
-#                     novo_sorteio.save()
-#             messages.success(request, 'Vagas confirmadas com sucesso!')
-#             return redirect('ng_adimplentes')
-
-#         if 'realizar_sorteio' in request.POST:
-#             random.shuffle(apartamentos_adimplentes)
-#             lista_de_presenca = apartamentos_adimplentes
-
-#             return render(request, 'nova_guarulhos/ng_adimplentes.html', {
-#                 'sorteio_finalizado': sorteio_finalizado,
-#                 'vagas_disponiveis': vagas_disponiveis,
-#                 'lista_de_presenca': lista_de_presenca
-#             })
-
-#     return render(request, 'nova_guarulhos/ng_adimplentes.html', {
-#         'sorteio_finalizado': sorteio_finalizado,
-#         'vagas_disponiveis': vagas_disponiveis,
-#         'lista_de_presenca': lista_de_presenca
-#     })
-
-
-
-# @staff_member_required
-# def ng_blocos(request):
-#     # Seleciona os blocos dos apartamentos adimplentes e presentes que ainda têm vagas a serem atribuídas
-#     blocos = list(Apartamento.objects.filter(presenca=True, adimplentes=True, sorteio__isnull=True).values_list('bloco', flat=True).distinct())
-
-#     sorteio_realizado = False
-#     ordem_blocos = request.session.get('ordem_blocos', [])
-
-#     if request.method == 'POST':
-#         if 'realizar_sorteio' in request.POST:
-#             random.shuffle(blocos)
-#             request.session['ordem_blocos'] = blocos
-#             sorteio_realizado = True
-#         elif 'sortear_novamente' in request.POST:
-#             random.shuffle(blocos)
-#             request.session['ordem_blocos'] = blocos
-#             sorteio_realizado = True
-
-#     return render(request, 'nova_guarulhos/ng_blocos.html', {
-#         'blocos': blocos,
-#         'ordem_blocos': ordem_blocos,
-#         'sorteio_realizado': sorteio_realizado
-#     })
-
 @staff_member_required
 def ng_blocos(request):
-    blocos = list(Apartamento.objects.filter(presenca=True, adimplentes=True, sorteio__isnull=True).values_list('bloco', flat=True).distinct())
+    # Filtra os blocos que têm apartamentos presentes, adimplentes e com vagas a serem atribuídas
+    blocos_com_apartamentos_validos = list(Apartamento.objects.filter(presenca=True, adimplentes=True).exclude(sorteio__apartamento__isnull=False).values_list('bloco', flat=True).distinct())
 
     sorteio_realizado = False
-    ordem_blocos = request.session.get('ordem_blocos', [])
 
     if request.method == 'POST':
-        random.shuffle(blocos)
-        request.session['ordem_blocos'] = blocos
+        random.shuffle(blocos_com_apartamentos_validos)
+        request.session['ordem_blocos'] = blocos_com_apartamentos_validos
         sorteio_realizado = True
+        print(f"Ordem dos blocos sorteada e armazenada na sessão: {blocos_com_apartamentos_validos}")
+
+    ordem_blocos = request.session.get('ordem_blocos', [])
+    print(f"Ordem dos blocos na sessão ao renderizar: {ordem_blocos}")
 
     return render(request, 'nova_guarulhos/ng_blocos.html', {
-        'blocos': blocos,
         'ordem_blocos': ordem_blocos,
         'sorteio_realizado': sorteio_realizado
     })
@@ -365,6 +251,8 @@ def ng_blocos(request):
 @staff_member_required
 def ng_adimplentes(request):
     ordem_blocos = request.session.get('ordem_blocos', [])
+    print(f"Ordem dos blocos na sessão ao iniciar ng_adimplentes: {ordem_blocos}")
+
     apartamentos_adimplentes = []
 
     # Mantém a ordem dos blocos e sorteia aleatoriamente os apartamentos dentro de cada bloco
@@ -372,6 +260,8 @@ def ng_adimplentes(request):
         apartamentos_do_bloco = list(Apartamento.objects.filter(presenca=True, adimplentes=True, bloco=bloco).exclude(sorteio__apartamento__isnull=False))
         random.shuffle(apartamentos_do_bloco)
         apartamentos_adimplentes.extend(apartamentos_do_bloco)
+
+    print(f"Apartamentos adimplentes sorteados dentro dos blocos: {[(apt.bloco, apt.numero_apartamento) for apt in apartamentos_adimplentes]}")
 
     vagas_disponiveis = list(Vaga.objects.exclude(sorteio__vaga__isnull=False))
     sorteio_finalizado = not apartamentos_adimplentes or not vagas_disponiveis
@@ -394,4 +284,91 @@ def ng_adimplentes(request):
         'vagas_disponiveis': vagas_disponiveis,
         'lista_de_presenca': lista_de_presenca,
         'ordem_blocos': ordem_blocos,
+    })
+
+
+def ng_excel(request):
+    caminho_modelo = 'static/assets/modelos/sorteio_nova_guarulhos.xlsx'
+
+    wb = load_workbook(caminho_modelo)
+    ws = wb.active
+
+    # Ordenar os resultados do sorteio pelo ID do apartamento
+    resultados_sorteio_nc = Sorteio.objects.select_related('apartamento', 'vaga').order_by('apartamento__bloco', 'apartamento__numero_apartamento').all()
+
+    horario_conclusao_nc = request.session.get('horario_conclusao_nc', 'Horário não disponível')
+    ws['C8'] = f"Sorteio realizado em: {horario_conclusao_nc}"
+
+    linha = 10
+    for sorteio in resultados_sorteio_nc:
+        ws[f'C{linha}'] = sorteio.apartamento.bloco
+        ws[f'D{linha}'] = sorteio.apartamento.numero_apartamento
+        ws[f'E{linha}'] = sorteio.vaga.vaga
+        linha += 1
+
+    response = HttpResponse(content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
+    nome_arquivo = "resultado_sorteio.xlsx"
+    response['Content-Disposition'] = f'attachment; filename={nome_arquivo}'
+
+    wb.save(response)
+
+    return response
+
+
+@staff_member_required
+def ng_final(request):
+    if request.method == 'POST':
+        # Obter todos os apartamentos que ainda não têm vagas atribuídas
+        apartamentos_sem_vaga = list(Apartamento.objects.exclude(sorteio__isnull=False))
+        vagas_disponiveis = list(Vaga.objects.exclude(id__in=Sorteio.objects.values_list('vaga_id', flat=True)))
+
+        # Verifica se há vagas suficientes para os apartamentos restantes
+        if len(vagas_disponiveis) >= len(apartamentos_sem_vaga):
+            random.shuffle(vagas_disponiveis)
+
+            for apartamento in apartamentos_sem_vaga:
+                vaga_selecionada = vagas_disponiveis.pop()
+                Sorteio.objects.create(
+                    apartamento=apartamento, 
+                    vaga=vaga_selecionada
+                )
+        else:
+            messages.error(request, 'Não há vagas suficientes para todos os apartamentos restantes.')
+
+        # Armazenar informações do sorteio na sessão
+        request.session['sorteio_iniciado_nc'] = True
+        request.session['horario_conclusao_nc'] = timezone.localtime().strftime("%d/%m/%Y às %Hh e %Mmin e %Ss")
+
+        return redirect('ng_final')
+
+    else:
+        sorteio_iniciado_nc = request.session.get('sorteio_iniciado_nc', False)
+        todos_apartamentos = Apartamento.objects.count()  # Conta todos os apartamentos registrados
+        apartamentos_sorteio = Sorteio.objects.count()  # Conta todos os apartamentos com vagas atribuídas
+        vagas_atribuidas_completas = todos_apartamentos == apartamentos_sorteio  # Verifica se todos têm vagas atribuídas
+
+        resultados_sorteio_nc = Sorteio.objects.select_related('apartamento', 'vaga').order_by('apartamento__bloco', 'apartamento__numero_apartamento').all()
+        vagas_atribuidas_nc = resultados_sorteio_nc.exists()  # Verificar se existem resultados
+
+        return render(request, 'nova_guarulhos/ng_final.html', {
+            'resultados_sorteio_nc': resultados_sorteio_nc,
+            'vagas_atribuidas_nc': vagas_atribuidas_nc,
+            'sorteio_iniciado_nc': sorteio_iniciado_nc,
+            'horario_conclusao_nc': request.session.get('horario_conclusao_nc', ''),
+            'vagas_atribuidas_completas': vagas_atribuidas_completas  # Adiciona essa variável ao contexto
+        })
+
+
+def ng_qrcode(request):
+    apartamentos_disponiveis = Apartamento.objects.all()  # Obtém todos os apartamentos disponíveis
+    bloco_apartamento = request.GET.get('apartamento')
+    resultados_filtrados = None
+    if bloco_apartamento:
+        bloco, numero_apartamento = bloco_apartamento.split(" - ")
+        resultados_filtrados = Sorteio.objects.filter(apartamento__bloco=bloco, apartamento__numero_apartamento=numero_apartamento)
+    
+    return render(request, 'nova_guarulhos/ng_qrcode.html', {
+        'resultados_filtrados': resultados_filtrados,
+        'apartamento_selecionado': bloco_apartamento,
+        'apartamentos_disponiveis': apartamentos_disponiveis,  # Certifique-se de adicionar esta linha
     })
