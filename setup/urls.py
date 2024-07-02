@@ -9,6 +9,8 @@ urlpatterns = [
     path('', include('lyon.urls')), 
     path('', include('helbor.urls')), 
     path('', include('nova_guarulhos.urls')), 
+    path('', include('max_club.urls')), 
+
 ]
 
 

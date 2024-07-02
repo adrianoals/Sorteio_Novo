@@ -50,6 +50,7 @@ INSTALLED_APPS = [
     'lyon.apps.LyonConfig',
     'helbor.apps.HelborConfig',
     'nova_guarulhos.apps.NovaGuarulhosConfig',
+    'max_club.apps.MaxClubConfig',
 ]
 
 MIDDLEWARE = [
