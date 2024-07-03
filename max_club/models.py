@@ -22,3 +22,17 @@ class Sorteio(models.Model):
         # Acesso ao bloco através do apartamento
         return f"Apartamento {self.apartamento.numero_apartamento}  Vaga: {self.vaga.vaga}"
 
+class VagaBike(models.Model):
+    vaga = models.CharField(max_length=50, unique=True)
+
+    def __str__(self):
+        return self.vaga
+
+class SorteioBike(models.Model):
+    apartamento = models.OneToOneField(Apartamento, on_delete=models.CASCADE)
+    vaga = models.OneToOneField(Vaga, on_delete=models.CASCADE)
+
+    def __str__(self):
+        # Acesso ao bloco através do apartamento
+        return f"Apartamento {self.apartamento.numero_apartamento}  Vaga: {self.vaga.vaga}"
+
