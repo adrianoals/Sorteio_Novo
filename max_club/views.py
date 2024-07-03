@@ -4,12 +4,6 @@ from django.utils import timezone
 import random
 from django.contrib.admin.views.decorators import staff_member_required
 
-# Excel
-from openpyxl import load_workbook
-from django.http import HttpResponse
-from django.utils import timezone
-from django.contrib import messages
-
 
 @staff_member_required
 def max_club(request):
