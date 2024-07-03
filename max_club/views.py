@@ -10,8 +10,7 @@ from django.http import HttpResponse
 from django.utils import timezone
 from .models import Sorteio, SorteioBike
 
-
-
+    
 # @staff_member_required
 # def max_club(request):
 #     if request.method == 'POST':
@@ -21,11 +20,30 @@ from .models import Sorteio, SorteioBike
 #         # Obter todos os apartamentos e grupos de vagas
 #         apartamentos = list(Apartamento.objects.all())
 #         vagas = list(Vaga.objects.all())
-
-#         # Certifique-se de que existem vagas suficientes para todos os apartamentos
+        
+#         # Definir a vaga especial
+#         vaga_especial = Vaga.objects.get(vaga="Vaga PNE Subsolo: 01")
+        
+#         # Sortear a vaga especial para o apartamento 904
+#         apartamento_especial = None
+#         for apt in apartamentos:
+#             if apt.numero_apartamento == "904":
+#                 apartamento_especial = apt
+#                 break
+        
+#         if apartamento_especial:
+#             # Criar sorteio para o apartamento especial
+#             Sorteio.objects.create(
+#                 apartamento=apartamento_especial,
+#                 vaga=vaga_especial
+#             )
+#             # Remover apartamento especial e a vaga especial das listas
+#             apartamentos.remove(apartamento_especial)
+#             vagas.remove(vaga_especial)
+        
+#         # Certifique-se de que existem vagas suficientes para os outros apartamentos
 #         if len(vagas) >= len(apartamentos):
 #             random.shuffle(vagas)
-
 #             for apartamento in apartamentos:
 #                 vaga_selecionada = vagas.pop()
 #                 Sorteio.objects.create(
@@ -33,7 +51,6 @@ from .models import Sorteio, SorteioBike
 #                     vaga=vaga_selecionada
 #                 )
 #         else:
-           
 #             pass
         
 #         # Armazenar informações do sorteio na sessão
@@ -53,7 +70,91 @@ from .models import Sorteio, SorteioBike
 #             'sorteio_iniciado_nc': sorteio_iniciado_nc,
 #             'horario_conclusao_nc': request.session.get('horario_conclusao_nc', '')
 #         })
+
+
+
+# Aqui funciona
+# from django.shortcuts import render, redirect
+# from .models import Apartamento, Vaga, Sorteio
+# from django.utils import timezone
+# import random
+# from django.contrib.admin.views.decorators import staff_member_required
+
+# @staff_member_required
+# def max_club(request):
+#     if request.method == 'POST':
+#         # Limpar registros anteriores de sorteio
+#         Sorteio.objects.all().delete()
+        
+#         # Obter todos os apartamentos e grupos de vagas
+#         apartamentos = list(Apartamento.objects.all())
+#         vagas = list(Vaga.objects.all())
+        
+#         # Definir as vagas especiais
+#         vaga_pne = Vaga.objects.get(vaga="Vaga PNE Subsolo: 01")
+#         vagas_prioritarias = [
+#             Vaga.objects.get(vaga="Vaga 63 Idoso Subsolo: 01"),
+#             Vaga.objects.get(vaga="Vaga 48 Idoso Subsolo: 01"),
+#             Vaga.objects.get(vaga="Vaga 33 Idoso Subsolo: 02"),
+#             Vaga.objects.get(vaga="Vaga 32 Idoso Subsolo: 02"),
+#             Vaga.objects.get(vaga="Vaga 17 Idoso Subsolo: 02")
+#         ]
+        
+#         # Sortear a vaga PNE entre os apartamentos 904 e 908
+#         apartamentos_especiais = [apt for apt in apartamentos if apt.numero_apartamento in ["904", "908"]]
+#         apartamento_pne = random.choice(apartamentos_especiais)
+#         apartamentos_especiais.remove(apartamento_pne)
+#         apartamento_prioritario = apartamentos_especiais[0]
+
+#         # Atribuir a vaga PNE
+#         Sorteio.objects.create(
+#             apartamento=apartamento_pne,
+#             vaga=vaga_pne
+#         )
+#         apartamentos.remove(apartamento_pne)
+#         vagas.remove(vaga_pne)
+
+#         # Atribuir uma das vagas prioritárias ao outro apartamento especial
+#         vaga_prioritaria_escolhida = random.choice(vagas_prioritarias)
+#         Sorteio.objects.create(
+#             apartamento=apartamento_prioritario,
+#             vaga=vaga_prioritaria_escolhida
+#         )
+#         apartamentos.remove(apartamento_prioritario)
+#         vagas.remove(vaga_prioritaria_escolhida)
+#         vagas_prioritarias.remove(vaga_prioritaria_escolhida)
+
+#         # Adicionar as vagas prioritárias restantes à lista de vagas disponíveis
+#         vagas_restantes = vagas_prioritarias + [vaga for vaga in vagas if vaga not in vagas_prioritarias]
+
+#         if len(vagas_restantes) >= len(apartamentos):
+#             random.shuffle(vagas_restantes)
+#             for apartamento in apartamentos:
+#                 vaga_selecionada = vagas_restantes.pop()
+#                 Sorteio.objects.create(
+#                     apartamento=apartamento, 
+#                     vaga=vaga_selecionada
+#                 )
+        
+#         # Armazenar informações do sorteio na sessão
+#         request.session['sorteio_iniciado_nc'] = True
+#         request.session['horario_conclusao_nc'] = timezone.localtime().strftime("%d/%m/%Y às %Hh e %Mmin e %Ss")
+
+#         return redirect('max_club')
     
+#     else:
+#         sorteio_iniciado_nc = request.session.get('sorteio_iniciado_nc', False)
+#         resultados_sorteio_nc = Sorteio.objects.select_related('apartamento', 'vaga').order_by('apartamento__id').all()
+#         vagas_atribuidas_nc = resultados_sorteio_nc.exists()  # Verificar se existem resultados
+
+#         return render(request, 'max_club/max_club.html', {
+#             'resultados_sorteio_nc': resultados_sorteio_nc,
+#             'vagas_atribuidas_nc': vagas_atribuidas_nc,
+#             'sorteio_iniciado_nc': sorteio_iniciado_nc,
+#             'horario_conclusao_nc': request.session.get('horario_conclusao_nc', '')
+#         })
+
+
 @staff_member_required
 def max_club(request):
     if request.method == 'POST':
@@ -64,37 +165,54 @@ def max_club(request):
         apartamentos = list(Apartamento.objects.all())
         vagas = list(Vaga.objects.all())
         
-        # Definir a vaga especial
-        vaga_especial = Vaga.objects.get(vaga="Vaga PNE Subsolo: 01")
+        # Definir as vagas especiais
+        vaga_pne = Vaga.objects.get(vaga="Vaga PNE Subsolo: 01")
+        vagas_prioritarias = [
+            Vaga.objects.get(vaga="Vaga 63 Idoso Subsolo: 01"),
+            Vaga.objects.get(vaga="Vaga 48 Idoso Subsolo: 01"),
+            Vaga.objects.get(vaga="Vaga 33 Idoso Subsolo: 02"),
+            Vaga.objects.get(vaga="Vaga 32 Idoso Subsolo: 02"),
+            Vaga.objects.get(vaga="Vaga 17 Idoso Subsolo: 02")
+        ]
         
-        # Sortear a vaga especial para o apartamento 904
-        apartamento_especial = None
-        for apt in apartamentos:
-            if apt.numero_apartamento == "904":
-                apartamento_especial = apt
-                break
+        # Lista de apartamentos especiais
+        apartamentos_especiais = [apt for apt in apartamentos if apt.numero_apartamento in ["904", "908"]]
         
-        if apartamento_especial:
-            # Criar sorteio para o apartamento especial
-            Sorteio.objects.create(
-                apartamento=apartamento_especial,
-                vaga=vaga_especial
-            )
-            # Remover apartamento especial e a vaga especial das listas
-            apartamentos.remove(apartamento_especial)
-            vagas.remove(vaga_especial)
-        
-        # Certifique-se de que existem vagas suficientes para os outros apartamentos
-        if len(vagas) >= len(apartamentos):
-            random.shuffle(vagas)
+        # Sortear a vaga PNE para um dos apartamentos especiais
+        apartamento_pne = random.choice(apartamentos_especiais)
+        apartamentos_especiais.remove(apartamento_pne)
+
+        # Atribuir a vaga PNE
+        Sorteio.objects.create(
+            apartamento=apartamento_pne,
+            vaga=vaga_pne
+        )
+        apartamentos.remove(apartamento_pne)
+        vagas.remove(vaga_pne)
+
+        # Atribuir vagas prioritárias aos demais apartamentos especiais
+        for apt in apartamentos_especiais:
+            if vagas_prioritarias:
+                vaga_prioritaria_escolhida = random.choice(vagas_prioritarias)
+                Sorteio.objects.create(
+                    apartamento=apt,
+                    vaga=vaga_prioritaria_escolhida
+                )
+                apartamentos.remove(apt)
+                vagas.remove(vaga_prioritaria_escolhida)
+                vagas_prioritarias.remove(vaga_prioritaria_escolhida)
+
+        # Adicionar as vagas prioritárias restantes à lista de vagas disponíveis
+        vagas_restantes = vagas_prioritarias + [vaga for vaga in vagas if vaga not in vagas_prioritarias]
+
+        if len(vagas_restantes) >= len(apartamentos):
+            random.shuffle(vagas_restantes)
             for apartamento in apartamentos:
-                vaga_selecionada = vagas.pop()
+                vaga_selecionada = vagas_restantes.pop()
                 Sorteio.objects.create(
                     apartamento=apartamento, 
                     vaga=vaga_selecionada
                 )
-        else:
-            pass
         
         # Armazenar informações do sorteio na sessão
         request.session['sorteio_iniciado_nc'] = True
