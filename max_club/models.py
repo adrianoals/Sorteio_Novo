@@ -28,6 +28,7 @@ class VagaBike(models.Model):
     def __str__(self):
         return self.vaga
 
+
 class SorteioBike(models.Model):
     apartamento = models.OneToOneField(Apartamento, on_delete=models.CASCADE)
     vaga = models.OneToOneField(Vaga, on_delete=models.CASCADE)
