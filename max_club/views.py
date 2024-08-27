@@ -234,7 +234,7 @@ def max_club(request):
 
 
 
-@staff_member_required
+# @staff_member_required
 def max_club_zerar(request):
     if request.method == 'POST':
         Sorteio.objects.all().delete()
