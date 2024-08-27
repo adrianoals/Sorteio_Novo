@@ -155,7 +155,7 @@ from .models import Sorteio, SorteioBike
 #         })
 
 
-@staff_member_required
+# @staff_member_required
 def max_club(request):
     if request.method == 'POST':
         # Limpar registros anteriores de sorteio
