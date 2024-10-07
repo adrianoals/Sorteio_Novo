@@ -20,7 +20,7 @@
         {% if vagas_atribuidas %}
         <div class="loading-container" id="loadingContainer">                          
             <div class="loading">
-                <img src="{% static 'assets/images/sorteio2.gif' %}" alt="Sorteando..." class="loading-gif mt-5">
+                <img src="{% static '/assets/images/sorteio2.gif' %}" alt="Sorteando..." class="loading-gif mt-5">
             </div>
         </div>
         {% endif %}
@@ -30,13 +30,25 @@
             <h2 class="text-center mb-4">Resultados do Sorteio</h2>
             {% for sorteio in resultados_sorteio %}
             <div class="row g-3 mt-3 linha-apartamento">
-                <div class="col-sm-4">
+                <div class="col-sm-3">
                     <label class="form-label text-dark">Apartamento</label>
                     <input type="text" class="form-control" value="{{ sorteio.apartamento.numero }}" readonly>
                 </div>
-                <div class="col-sm-4">
+                <div class="col-sm-3">
                     <label class="form-label text-dark">Vaga</label>
                     <input type="text" class="form-control" value="{{ sorteio.vaga.numero }}" readonly>
+                </div>
+                <div class="col-sm-2">
+                    <label class="form-label text-dark">Subsolo</label>
+                    <input type="text" class="form-control" value="{{ sorteio.vaga.subsolo }}" readonly>
+                </div>
+                <div class="col-sm-2">
+                    <label class="form-label text-dark">Tipo da Vaga</label>
+                    <input type="text" class="form-control" value="{{ sorteio.vaga.get_tipo_display }}" readonly>
+                </div>
+                <div class="col-sm-2">
+                    <label class="form-label text-dark">Especialidade</label>
+                    <input type="text" class="form-control" value="{{ sorteio.vaga.get_especial_display }}" readonly>
                 </div>
             </div>
             {% endfor %}
@@ -53,7 +65,7 @@
                 <a href="{% url 'tres_coelhos_excel' %}" class="btn btn-info mt-3">Exportar para Excel</a> 
             </div>
             <div class="text-center mt-5">
-                <img src="{% static 'assets/images/tres_coelhos_qrcode.png' %}" alt="QR Code" style="max-width: 200px;"/>
+                <img src="{% static '/assets/images/tres_coelhos_qrcode.png' %}" alt="QR Code" style="max-width: 200px;"/>
                 <p class="text-dark">Escaneie o QR Code para acessar seu resultado.</p>
             </div>
         {% endif %}

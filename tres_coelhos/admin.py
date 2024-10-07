@@ -11,8 +11,8 @@ class ApartamentoAdmin(admin.ModelAdmin):
 # Customizando a exibição do model Vaga no admin
 @admin.register(Vaga)
 class VagaAdmin(admin.ModelAdmin):
-    list_display = ('id', 'numero', 'tipo', 'especial', 'subsolo', 'is_livre_quando_nao_especial')  # Exibe informações importantes das vagas
-    list_display_links = ('id', 'numero')  # Links clicáveis para edição
+    list_display = ('id', 'numero', 'tipo', 'especial', 'subsolo', 'is_livre_quando_nao_especial', 'dupla_com')  # Exibe informações importantes das vagas
+    list_display_links = ('id', 'numero', 'tipo', 'especial', 'subsolo', 'is_livre_quando_nao_especial', 'dupla_com')  # Links clicáveis para edição
     list_filter = ('tipo', 'especial', 'subsolo', 'is_livre_quando_nao_especial')  # Filtros para facilitar a navegação no admin
     search_fields = ['numero']  # Permite busca por número da vaga
 
