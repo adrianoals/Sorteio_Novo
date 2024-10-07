@@ -5,7 +5,7 @@ from .models import Apartamento, Vaga, Sorteio, DuplaSorteio
 @admin.register(Apartamento)
 class ApartamentoAdmin(admin.ModelAdmin):
     list_display = ('id', 'numero', 'is_pne', 'is_idoso')  # Exibe o ID, o número, e se é PNE ou Idoso
-    list_display_links = ('id', 'numero')  # Links clicáveis para edição
+    list_display_links = ('id', 'numero', 'is_pne', 'is_idoso')  # Links clicáveis para edição
     list_filter = ('is_pne', 'is_idoso')  # Filtros para facilitar a seleção
 
 # Customizando a exibição do model Vaga no admin
