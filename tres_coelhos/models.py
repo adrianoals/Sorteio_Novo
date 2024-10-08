@@ -50,13 +50,11 @@ class DuplaApartamentos(models.Model):
     def __str__(self):
         return f"Dupla: {self.apartamento_1} e {self.apartamento_2}"
 
-# Model para representar a dupla de apartamentos sorteados juntos para vagas duplas
-class DuplaSorteio(models.Model):
-    apartamento_1 = models.ForeignKey(Apartamento, on_delete=models.CASCADE, related_name='dupla_apartamento_sorteio_1')
-    apartamento_2 = models.ForeignKey(Apartamento, on_delete=models.CASCADE, related_name='dupla_apartamento_sorteio_2', null=True, blank=True)
-    vaga_1 = models.ForeignKey(Vaga, on_delete=models.CASCADE, related_name='vaga_sorteio_1')
-    vaga_2 = models.ForeignKey(Vaga, on_delete=models.CASCADE, related_name='vaga_sorteio_2', null=True, blank=True)
+class SorteioDupla(models.Model):
+    apartamento = models.ForeignKey(Apartamento, on_delete=models.CASCADE)
+    vaga = models.ForeignKey(Vaga, on_delete=models.CASCADE)
     data_sorteio = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
-        return f"Dupla: {self.apartamento_1} e {self.apartamento_2} -> Vagas {self.vaga_1} e {self.vaga_2}"
+        return f"{self.apartamento.numero} -> Vaga {self.vaga.numero} (Dupla com {self.vaga.dupla_com.numero if self.vaga.dupla_com else 'N/A'}) em {self.data_sorteio}"
+

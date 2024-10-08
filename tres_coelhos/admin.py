@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import Apartamento, Vaga, Sorteio, DuplaApartamentos, DuplaSorteio
+from .models import Apartamento, Vaga, Sorteio, DuplaApartamentos, SorteioDupla
 from django.core.exceptions import ValidationError
 from django import forms
 
@@ -59,16 +59,12 @@ class DuplaApartamentosAdmin(admin.ModelAdmin):
             kwargs["queryset"] = Apartamento.objects.exclude(id__in=used_apartments_1).exclude(id__in=used_apartments_2).exclude(sorteio__isnull=False)
         return super().formfield_for_foreignkey(db_field, request, **kwargs)
 
-# Customizando a exibição do model DuplaSorteio no admin
-@admin.register(DuplaSorteio)
-class DuplaSorteioAdmin(admin.ModelAdmin):
-    list_display = ('id', 'apartamento_1', 'apartamento_2', 'vaga_1', 'vaga_2', 'data_sorteio')
-    list_display_links = ('id', 'apartamento_1', 'vaga_1')
-    list_filter = ('apartamento_1', 'apartamento_2', 'vaga_1', 'vaga_2')  # Filtros para duplas
+@admin.register(SorteioDupla)
+class SorteioDuplaAdmin(admin.ModelAdmin):
+    list_display = ('id', 'apartamento', 'vaga', 'vaga_dupla', 'data_sorteio')
 
-    # Filtra as vagas disponíveis para mostrar apenas aquelas que ainda não foram sorteadas
-    def formfield_for_foreignkey(self, db_field, request, **kwargs):
-        if db_field.name in ['vaga_1', 'vaga_2']:
-            # Filtrar para exibir apenas vagas que ainda não estão associadas a sorteios
-            kwargs["queryset"] = Vaga.objects.filter(sorteio__isnull=True)
-        return super().formfield_for_foreignkey(db_field, request, **kwargs)
+    def vaga_dupla(self, obj):
+        # Acessa a vaga dupla associada (via vaga.dupla_com)
+        return obj.vaga.dupla_com.numero if obj.vaga.dupla_com else 'N/A'
+    
+    vaga_dupla.short_description = 'Vaga Dupla Com'  # Nome da coluna no admin
