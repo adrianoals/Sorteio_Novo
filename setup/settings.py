@@ -44,13 +44,6 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles', 
-    'sorteio_novo.apps.SorteioNovoConfig',
-    'assincon.apps.AssinconConfig',
-    'porcelana.apps.PorcelanaConfig',
-    'lyon.apps.LyonConfig',
-    'helbor.apps.HelborConfig',
-    'nova_guarulhos.apps.NovaGuarulhosConfig',
-    'max_club.apps.MaxClubConfig',
     'tres_coelhos.apps.TresCoelhosConfig',
 ]
 
