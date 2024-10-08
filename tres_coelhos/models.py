@@ -41,13 +41,21 @@ class Sorteio(models.Model):
     def __str__(self):
         return f"{self.apartamento.numero} -> {self.vaga.numero} em {self.data_sorteio}"
 
+# Model para representar a dupla de apartamentos (pré-formadas para sorteio de vagas duplas)
+class DuplaApartamentos(models.Model):
+    apartamento_1 = models.ForeignKey(Apartamento, on_delete=models.CASCADE, related_name='dupla_apartamento_pre_1')
+    apartamento_2 = models.ForeignKey(Apartamento, on_delete=models.CASCADE, related_name='dupla_apartamento_pre_2', null=True, blank=True)
+    data_criacao = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"Dupla: {self.apartamento_1} e {self.apartamento_2}"
 
 # Model para representar a dupla de apartamentos sorteados juntos para vagas duplas
 class DuplaSorteio(models.Model):
-    apartamento_1 = models.ForeignKey(Apartamento, on_delete=models.CASCADE, related_name='dupla_apartamento_1')
-    apartamento_2 = models.ForeignKey(Apartamento, on_delete=models.CASCADE, related_name='dupla_apartamento_2', null=True, blank=True)
-    vaga_1 = models.ForeignKey(Vaga, on_delete=models.CASCADE, related_name='vaga_1')
-    vaga_2 = models.ForeignKey(Vaga, on_delete=models.CASCADE, related_name='vaga_2', null=True, blank=True)
+    apartamento_1 = models.ForeignKey(Apartamento, on_delete=models.CASCADE, related_name='dupla_apartamento_sorteio_1')
+    apartamento_2 = models.ForeignKey(Apartamento, on_delete=models.CASCADE, related_name='dupla_apartamento_sorteio_2', null=True, blank=True)
+    vaga_1 = models.ForeignKey(Vaga, on_delete=models.CASCADE, related_name='vaga_sorteio_1')
+    vaga_2 = models.ForeignKey(Vaga, on_delete=models.CASCADE, related_name='vaga_sorteio_2', null=True, blank=True)
     data_sorteio = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):

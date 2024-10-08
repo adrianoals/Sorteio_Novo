@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sorteio de Vagas Duplas</title>
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+</head>
+<body>
+    <div class="container">
+        <h1>Sorteio de Vagas Duplas</h1>
+
+        {% if resultados_sorteio %}
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>Apartamento</th>
+                        <th>Vaga</th>
+                        <th>Subsolo</th>
+                        <th>Tipo da Vaga</th>
+                        <th>Vaga Livre</th>
+                        <th>Especialidade</th>
+                        <th>Dupla Com</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for resultado in resultados_sorteio %}
+                        <tr>
+                            <td>{{ resultado.apartamento.numero }}</td>
+                            <td>{{ resultado.vaga.numero }}</td>
+                            <td>{{ resultado.vaga.subsolo }}</td>
+                            <td>{{ resultado.vaga.get_tipo_display }}</td>
+                            <td>{{ resultado.vaga.is_livre_quando_nao_especial|yesno:"Sim,Não" }}</td>
+                            <td>{{ resultado.vaga.get_especial_display }}</td>
+                            <td>
+                                {% if resultado.vaga.dupla_com %}
+                                    Vaga {{ resultado.vaga.dupla_com.numero }}
+                                {% else %}
+                                    Nenhuma
+                                {% endif %}
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        {% else %}
+            <p>Nenhuma vaga dupla foi sorteada ainda.</p>
+        {% endif %}
+
+        <a href="{% url 'tres_coelhos_excel' %}" class="btn btn-primary">Baixar resultado em Excel</a>
+    </div>
+</body>
+</html>
