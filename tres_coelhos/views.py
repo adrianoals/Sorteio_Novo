@@ -133,31 +133,42 @@ def tres_coelhos_sorteio(request):
             'horario_conclusao': request.session.get('horario_conclusao', '')
         })
 
+from openpyxl import load_workbook
+from django.http import HttpResponse
 
 def tres_coelhos_excel(request):
-    # Criar o Workbook
-    wb = Workbook()
+    # Caminho do modelo Excel
+    caminho_modelo = 'setup/static/assets/modelos/sorteio_novo.xlsx'
+
+    # Carregar o modelo existente
+    wb = load_workbook(caminho_modelo)
     ws = wb.active
-    ws.title = "Resultados do Sorteio"
 
-    # Cabeçalho
-    ws.append(['Número Apartamento', 'Número Vaga'])
-
-    # Adicionar resultados do sorteio
+    # Ordenar os resultados do sorteio pelo ID do apartamento
     resultados_sorteio = Sorteio.objects.select_related('apartamento', 'vaga').order_by('apartamento__id').all()
 
+    # Pegar o horário de conclusão do sorteio
+    horario_conclusao = request.session.get('horario_conclusao', 'Horário não disponível')
+    ws['B8'] = f"Sorteio realizado em: {horario_conclusao}"
+
+    # Começar a partir da linha 10 (baseado no layout do seu modelo)
+    linha = 10
     for sorteio in resultados_sorteio:
-        ws.append([sorteio.apartamento.numero, sorteio.vaga.numero])
+        ws[f'B{linha}'] = sorteio.apartamento.numero  # Número do apartamento
+        ws[f'C{linha}'] = sorteio.vaga.numero  # Número da vaga
+        ws[f'D{linha}'] = f'Subsolo {sorteio.vaga.subsolo}'  # Subsolo
+        ws[f'E{linha}'] = sorteio.vaga.get_tipo_display()  # Tipo da vaga
+        ws[f'F{linha}'] = sorteio.vaga.get_especial_display()  # Especialidade da vaga
+        linha += 1
 
     # Configurar a resposta para o download do Excel
     response = HttpResponse(content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
     response['Content-Disposition'] = 'attachment; filename="resultado_sorteio_tres_coelhos.xlsx"'
-    
+
     # Salvar o arquivo Excel na resposta
     wb.save(response)
-    
-    return response
 
+    return response
 
 
 def tres_coelhos_qrcode(request):
