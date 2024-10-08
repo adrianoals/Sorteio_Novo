@@ -3,13 +3,22 @@ from .models import Apartamento, Vaga, Sorteio, DuplaApartamentos, SorteioDupla
 from django.core.exceptions import ValidationError
 from django import forms
 
+# # Customizando a exibição do model Apartamento no admin
+# @admin.register(Apartamento)
+# class ApartamentoAdmin(admin.ModelAdmin):
+#     list_display = ('id', 'numero', 'is_pne', 'is_idoso')  # Exibe o ID, o número, e se é PNE ou Idoso
+#     list_display_links = ('id', 'numero')  # Links clicáveis para edição
+#     list_editable = ('is_pne', 'is_idoso')  # Permite edição direta 
+#     list_filter = ('is_pne', 'is_idoso')  # Filtros para facilitar a seleção
+
 # Customizando a exibição do model Apartamento no admin
 @admin.register(Apartamento)
 class ApartamentoAdmin(admin.ModelAdmin):
-    list_display = ('id', 'numero', 'is_pne', 'is_idoso')  # Exibe o ID, o número, e se é PNE ou Idoso
+    list_display = ('id', 'numero', 'is_pne', 'is_idoso', 'subsolo', 'apenas_dupla', 'apenas_livre')  # Exibe o ID, o número, PNE, Idoso, Subsolo, Dupla e Livre
     list_display_links = ('id', 'numero')  # Links clicáveis para edição
-    list_editable = ('is_pne', 'is_idoso')  # Permite edição direta 
-    list_filter = ('is_pne', 'is_idoso')  # Filtros para facilitar a seleção
+    list_editable = ('is_pne', 'is_idoso', 'subsolo', 'apenas_dupla', 'apenas_livre')  # Permite edição direta
+    list_filter = ('is_pne', 'is_idoso', 'subsolo', 'apenas_dupla', 'apenas_livre')  # Filtros para facilitar a seleção
+    search_fields = ['numero']  # Adiciona a possibilidade de busca por número do apartamento
 
 # Customizando a exibição do model Vaga no admin
 @admin.register(Vaga)

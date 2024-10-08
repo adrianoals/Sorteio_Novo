@@ -1,13 +1,27 @@
 from django.db import models
 
-# Representa cada apartamento participante
-class Apartamento(models.Model):
-    numero = models.CharField(max_length=10)  # Exemplo: "405", "101"
-    is_pne = models.BooleanField(default=False)  # Indica se o apartamento é elegível para vaga PNE
-    is_idoso = models.BooleanField(default=False)  # Indica se o apartamento é elegível para vaga de Idoso
+# # Representa cada apartamento participante
+# class Apartamento(models.Model):
+#     numero = models.CharField(max_length=10)  # Exemplo: "405", "101"
+#     is_pne = models.BooleanField(default=False)  # Indica se o apartamento é elegível para vaga PNE
+#     is_idoso = models.BooleanField(default=False)  # Indica se o apartamento é elegível para vaga de Idoso
 
+#     def __str__(self):
+#         return f"Apartamento {self.numero}"
+
+
+class Apartamento(models.Model):
+    numero = models.CharField(max_length=10)
+    is_pne = models.BooleanField(default=False)
+    is_idoso = models.BooleanField(default=False)
+    subsolo = models.IntegerField(choices=[(1, 'Subsolo 1'), (2, 'Subsolo 2')], null=True, blank=True)
+    apenas_dupla = models.BooleanField(default=False)
+    apenas_livre = models.BooleanField(default=False)
+    
     def __str__(self):
         return f"Apartamento {self.numero}"
+
+
 
 # Representa cada vaga de estacionamento
 class Vaga(models.Model):
