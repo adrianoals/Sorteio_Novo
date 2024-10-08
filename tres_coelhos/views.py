@@ -5,7 +5,7 @@ from django.http import HttpResponse
 from openpyxl import Workbook  # Para gerar o Excel
 import qrcode  # Para gerar o QR Code
 from io import BytesIO  # Para manipular imagens em memória
-from .models import Apartamento, Vaga, Sorteio
+from .models import Apartamento, Vaga, Sorteio, SorteioDupla, DuplaApartamentos
 
 def tres_coelhos_sorteio(request):
     if request.method == 'POST':
@@ -177,90 +177,7 @@ def tres_coelhos_qrcode(request):
         return HttpResponse("Apartamento não encontrado ou não sorteado.")
 
 
-# from django.shortcuts import render, redirect
-# from django.utils import timezone
-# from .models import Apartamento, Vaga, SorteioDupla, DuplaApartamentos
-# import random
 
-# def tres_coelhos_dupla(request):
-#     if request.method == 'POST':
-#         # Limpar registros anteriores de sorteio de duplas
-#         SorteioDupla.objects.all().delete()
-#         print("Sorteios anteriores apagados (duplas).")
-
-#         # Obter todas as duplas de apartamentos (pré-selecionadas)
-#         duplas_apartamentos = list(DuplaApartamentos.objects.all())
-        
-#         # Capturar IDs de apartamentos que fazem parte das duplas
-#         apartamentos_em_duplas_ids = [dupla.apartamento_1.id for dupla in duplas_apartamentos] + \
-#                                     [dupla.apartamento_2.id for dupla in duplas_apartamentos if dupla.apartamento_2]
-
-#         # Obter apartamentos que não foram sorteados e que não fazem parte de nenhuma dupla
-#         apartamentos_nao_sorteados = list(Apartamento.objects.exclude(id__in=apartamentos_em_duplas_ids).exclude(sorteio__isnull=False))
-
-#         print(f"Duplas formadas: {len(duplas_apartamentos)}")
-#         print(f"Apartamentos não sorteados: {len(apartamentos_nao_sorteados)}")
-
-#         # Obter as vagas duplas disponíveis (para duplas)
-#         vagas_duplas = list(Vaga.objects.filter(tipo='DUPLA').filter(sorteio__isnull=True))
-
-#         print(f"Vagas duplas disponíveis: {len(vagas_duplas)}")
-
-#         # **Sorteio de vagas duplas para apartamentos em duplas**
-#         random.shuffle(duplas_apartamentos)
-#         for dupla in duplas_apartamentos:
-#             if vagas_duplas:
-#                 vaga_escolhida_1 = random.choice(vagas_duplas)
-#                 vaga_escolhida_2 = vaga_escolhida_1.dupla_com  # Vaga dupla associada
-
-#                 # Criar o sorteio da dupla
-#                 SorteioDupla.objects.create(apartamento=dupla.apartamento_1, vaga=vaga_escolhida_1)
-#                 SorteioDupla.objects.create(apartamento=dupla.apartamento_2, vaga=vaga_escolhida_2)
-
-#                 print(f"Sorteado: Apartamento {dupla.apartamento_1.numero} -> Vaga {vaga_escolhida_1.numero}")
-#                 print(f"Sorteado: Apartamento {dupla.apartamento_2.numero} -> Vaga {vaga_escolhida_2.numero}")
-
-#                 # Remover as vagas duplas da lista de disponíveis
-#                 vagas_duplas.remove(vaga_escolhida_1)
-#             else:
-#                 break  # Sem mais vagas duplas
-
-#         # **Sorteio para apartamentos não sorteados**
-#         # Apartamentos que não formaram duplas vão concorrer às vagas restantes
-#         vagas_restantes = list(Vaga.objects.filter(sorteio__isnull=True))
-#         random.shuffle(apartamentos_nao_sorteados)
-
-#         for apartamento in apartamentos_nao_sorteados:
-#             if vagas_restantes:
-#                 vaga_escolhida = random.choice(vagas_restantes)
-#                 SorteioDupla.objects.create(apartamento=apartamento, vaga=vaga_escolhida)
-#                 print(f"Sorteado: Apartamento {apartamento.numero} -> Vaga {vaga_escolhida.numero}")
-#                 vagas_restantes.remove(vaga_escolhida)
-#             else:
-#                 break  # Sem mais vagas disponíveis
-
-#         # Armazenar informações do sorteio na sessão
-#         request.session['sorteio_dupla_iniciado'] = True
-#         request.session['horario_conclusao_dupla'] = timezone.localtime().strftime("%d/%m/%Y às %Hh %Mmin e %Ss")
-
-#         return redirect('tres_coelhos_dupla')
-
-#     else:
-#         sorteio_iniciado = request.session.get('sorteio_dupla_iniciado', False)
-#         resultados_sorteio = SorteioDupla.objects.select_related('apartamento', 'vaga').order_by('apartamento__id').all()
-#         vagas_atribuidas = resultados_sorteio.exists()
-
-#         return render(request, 'tres_coelhos/tres_coelhos_dupla.html', {
-#             'resultados_sorteio': resultados_sorteio,
-#             'vagas_atribuidas': vagas_atribuidas,
-#             'sorteio_iniciado': sorteio_iniciado,
-#             'horario_conclusao': request.session.get('horario_conclusao_dupla', '')
-#         })
-
-from django.shortcuts import render, redirect
-from django.utils import timezone
-from .models import Apartamento, Vaga, SorteioDupla, DuplaApartamentos
-import random
 
 def tres_coelhos_dupla(request):
     if request.method == 'POST':

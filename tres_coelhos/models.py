@@ -1,15 +1,5 @@
 from django.db import models
 
-# # Representa cada apartamento participante
-# class Apartamento(models.Model):
-#     numero = models.CharField(max_length=10)  # Exemplo: "405", "101"
-#     is_pne = models.BooleanField(default=False)  # Indica se o apartamento é elegível para vaga PNE
-#     is_idoso = models.BooleanField(default=False)  # Indica se o apartamento é elegível para vaga de Idoso
-
-#     def __str__(self):
-#         return f"Apartamento {self.numero}"
-
-
 class Apartamento(models.Model):
     numero = models.CharField(max_length=10)
     is_pne = models.BooleanField(default=False)
@@ -21,9 +11,6 @@ class Apartamento(models.Model):
     def __str__(self):
         return f"Apartamento {self.numero}"
 
-
-
-# Representa cada vaga de estacionamento
 class Vaga(models.Model):
     TIPO_VAGA_CHOICES = [
         ('DUPLA', 'Vaga Dupla'),
@@ -46,7 +33,7 @@ class Vaga(models.Model):
     def __str__(self):
         return f"Vaga {self.numero} ({self.get_tipo_display()}, {self.get_especial_display()})"
 
-# Registra o resultado de um sorteio entre um apartamento e uma vaga
+
 class Sorteio(models.Model):
     apartamento = models.ForeignKey(Apartamento, on_delete=models.CASCADE)
     vaga = models.ForeignKey(Vaga, on_delete=models.CASCADE)
@@ -55,7 +42,7 @@ class Sorteio(models.Model):
     def __str__(self):
         return f"{self.apartamento.numero} -> {self.vaga.numero} em {self.data_sorteio}"
 
-# Model para representar a dupla de apartamentos (pré-formadas para sorteio de vagas duplas)
+
 class DuplaApartamentos(models.Model):
     apartamento_1 = models.ForeignKey(Apartamento, on_delete=models.CASCADE, related_name='dupla_apartamento_pre_1')
     apartamento_2 = models.ForeignKey(Apartamento, on_delete=models.CASCADE, related_name='dupla_apartamento_pre_2', null=True, blank=True)
@@ -63,6 +50,7 @@ class DuplaApartamentos(models.Model):
 
     def __str__(self):
         return f"Dupla: {self.apartamento_1} e {self.apartamento_2}"
+
 
 class SorteioDupla(models.Model):
     apartamento = models.ForeignKey(Apartamento, on_delete=models.CASCADE)
