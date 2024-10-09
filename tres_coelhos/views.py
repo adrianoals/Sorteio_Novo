@@ -2,10 +2,12 @@ from django.shortcuts import render, redirect
 from django.utils import timezone
 import random
 from django.http import HttpResponse
-from openpyxl import Workbook  # Para gerar o Excel
+# from openpyxl import Workbook  # Para gerar o Excel
+from openpyxl import load_workbook
 import qrcode  # Para gerar o QR Code
 from io import BytesIO  # Para manipular imagens em memória
 from .models import Apartamento, Vaga, Sorteio, SorteioDupla, DuplaApartamentos
+
 
 def tres_coelhos_sorteio(request):
     if request.method == 'POST':
@@ -133,8 +135,6 @@ def tres_coelhos_sorteio(request):
             'horario_conclusao': request.session.get('horario_conclusao', '')
         })
 
-from openpyxl import load_workbook
-from django.http import HttpResponse
 
 def tres_coelhos_excel(request):
     # Caminho do modelo Excel
@@ -172,20 +172,31 @@ def tres_coelhos_excel(request):
 
 
 def tres_coelhos_qrcode(request):
+    # Obter todos os apartamentos para preencher o dropdown
+    apartamentos_disponiveis = Apartamento.objects.all()
+    
+    # Obter o apartamento selecionado através do filtro (via GET)
     numero_apartamento = request.GET.get('apartamento')
-    sorteio_apartamento = Sorteio.objects.filter(apartamento__numero=numero_apartamento).first()
+    
+    # Inicializar a variável de resultados filtrados como None
+    resultados_filtrados = []
 
-    if sorteio_apartamento:
-        # Gerar o conteúdo do QR Code
-        qr_text = f"Apartamento: {sorteio_apartamento.apartamento.numero}\nVaga: {sorteio_apartamento.vaga.numero}"
-        img = qrcode.make(qr_text)
+    # Se o apartamento foi selecionado, realizar a filtragem dos resultados do sorteio
+    if numero_apartamento:
+        # Buscar os sorteios para vagas livres
+        sorteios_livres = Sorteio.objects.filter(apartamento__numero=numero_apartamento)
         
-        # Converter a imagem do QR Code em uma resposta de imagem
-        response = HttpResponse(content_type="image/png")
-        img.save(response, "PNG")
-        return response
-    else:
-        return HttpResponse("Apartamento não encontrado ou não sorteado.")
+        # Buscar os sorteios para vagas duplas
+        sorteios_duplas = SorteioDupla.objects.filter(apartamento__numero=numero_apartamento)
+
+        # Unir os resultados de vagas livres e vagas duplas
+        resultados_filtrados = list(sorteios_livres) + list(sorteios_duplas)
+
+    return render(request, 'tres_coelhos/tres_coelhos_qrcode.html', {
+        'resultados_filtrados': resultados_filtrados,
+        'apartamento_selecionado': numero_apartamento,
+        'apartamentos_disponiveis': apartamentos_disponiveis,
+    })
 
 
 
