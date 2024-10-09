@@ -284,26 +284,52 @@ def tres_coelhos_dupla(request):
         })
 
 
+
 def tres_coelhos_dupla_excel(request):
-    # Criar o Workbook
-    wb = Workbook()
+    # Caminho do modelo Excel
+    caminho_modelo = 'setup/static/assets/modelos/sorteio_novo2.xlsx'
+
+    # Carregar o modelo existente
+    wb = load_workbook(caminho_modelo)
     ws = wb.active
-    ws.title = "Resultados do Sorteio"
 
-    # Cabeçalho
-    ws.append(['Número Apartamento', 'Número Vaga'])
+    # Ordenar os resultados do sorteio pelo ID do apartamento
+    resultados_sorteio = SorteioDupla.objects.select_related('apartamento', 'vaga').order_by('apartamento__id').all()
 
-    # Adicionar resultados do sorteio
-    resultados_sorteio = Sorteio.objects.select_related('apartamento', 'vaga').order_by('apartamento__id').all()
+    # Pegar o horário de conclusão do sorteio
+    horario_conclusao = request.session.get('horario_conclusao', 'Horário não disponível')
+    ws['A8'] = f"Sorteio realizado em: {horario_conclusao}"
 
+    # Começar a partir da linha 10 (baseado no layout do seu modelo)
+    linha = 10
     for sorteio in resultados_sorteio:
-        ws.append([sorteio.apartamento.numero, sorteio.vaga.numero])
+        ws[f'A{linha}'] = sorteio.apartamento.numero  # Número do apartamento
+        ws[f'B{linha}'] = sorteio.vaga.numero  # Número da vaga
+        ws[f'C{linha}'] = f'Subsolo {sorteio.vaga.subsolo}'  # Subsolo
+        ws[f'D{linha}'] = sorteio.vaga.get_tipo_display()  # Tipo da vaga
+        ws[f'E{linha}'] = sorteio.vaga.get_especial_display()  # Especialidade da vaga
+
+        # Adicionar "Dupla Com" (número da vaga associada, se houver)
+        ws[f'F{linha}'] = sorteio.vaga.dupla_com.numero if sorteio.vaga.dupla_com else "N/A"  # Número da vaga dupla
+
+        linha += 1
 
     # Configurar a resposta para o download do Excel
     response = HttpResponse(content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
-    response['Content-Disposition'] = 'attachment; filename="resultado_sorteio_tres_coelhos.xlsx"'
-    
+    response['Content-Disposition'] = 'attachment; filename="resultado_sorteio_dupla_tres_coelhos.xlsx"'
+
     # Salvar o arquivo Excel na resposta
     wb.save(response)
-    
+
     return response
+
+
+def tres_coelhos_zerar(request):
+    if request.method == 'POST':
+        Sorteio.objects.all().delete()
+        SorteioDupla.objects.all().delete()
+        return redirect('tres_coelhos_sorteio')
+    else:
+        return render(request, 'tres_coelhos/tres_coelhos_zerar.html')
+    
+

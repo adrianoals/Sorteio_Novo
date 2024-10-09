@@ -16,7 +16,7 @@ urlpatterns = [
         path('sorteio/dupla/excel/', tres_coelhos_dupla_excel, name='tres_coelhos_dupla_excel'),
         
         # Rota para zerar o sorteio
-        path('tres_coelhos_zerar/', tres_coelhos_zerar, name='tres_coelhos_zerar'),
-''
+        path('tres-coelhos-zerar/', tres_coelhos_zerar, name='tres_coelhos_zerar')
+
 ]
 
