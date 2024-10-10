@@ -333,3 +333,39 @@ def tres_coelhos_zerar(request):
         return render(request, 'tres_coelhos/tres_coelhos_zerar.html')
     
 
+def tres_coelhos_resultado(request):
+    # Obtenha os resultados do sorteio e do sorteio duplo
+    resultados_sorteio = list(Sorteio.objects.all())
+    resultados_sorteio_dupla = list(SorteioDupla.objects.all())
+
+    # Combine os resultados em uma única lista
+    resultados_combinados = resultados_sorteio + resultados_sorteio_dupla
+
+    # Ordene os resultados combinados pelo ID
+    resultados_combinados.sort(key=lambda x: x.id)
+
+    # Crie uma lista unificada com dados consistentes
+    resultados_formatados = []
+    for sorteio in resultados_combinados:
+        apartamento_numero = sorteio.apartamento.numero if hasattr(sorteio, 'apartamento') else '-'
+        vaga_numero = sorteio.vaga.numero if hasattr(sorteio, 'vaga') else '-'
+        vaga_subsolo = sorteio.vaga.subsolo if hasattr(sorteio, 'vaga') else '-'
+        tipo_vaga = sorteio.vaga.get_tipo_display() if hasattr(sorteio, 'vaga') else '-'
+        especialidade = sorteio.vaga.get_especial_display() if hasattr(sorteio, 'vaga') else '-'
+        dupla_com_numero = sorteio.vaga.dupla_com.numero if hasattr(sorteio.vaga, 'dupla_com') and sorteio.vaga.dupla_com else '-'
+
+        resultados_formatados.append({
+            'apartamento': apartamento_numero,
+            'vaga': vaga_numero,
+            'subsolo': vaga_subsolo,
+            'tipo_vaga': tipo_vaga,
+            'especialidade': especialidade,
+            'dupla_com': dupla_com_numero
+        })
+
+    # Passe os dados formatados para o contexto
+    context = {
+        'resultados_combinados': resultados_formatados
+    }
+
+    return render(request, 'tres_coelhos/tres_coelhos_resultado.html', context)

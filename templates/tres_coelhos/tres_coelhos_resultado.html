@@ -1,0 +1,51 @@
+{% extends 'sorteio_novo/base_simples.html' %}
+{% load static %}
+{% block content %}
+
+<div class="container">
+    <h1 class="fw-normal lh-1 text-center mb-5" id="titulo">Resultado Completo do Sorteio - Condomínio Tres Coelhos</h1>
+</div>
+
+<main>
+    <div class="p-4" id="container-sorteio-3333">
+        {% if resultados_combinados %}
+        <div class="resultados mt-4">
+            <h2 class="text-center mb-4">Resultados do Sorteio</h2>
+            {% for sorteio in resultados_combinados %}
+            <div class="row g-3 mt-3 linha-apartamento">
+                <div class="col-sm-2">
+                    <label class="form-label text-dark">Apartamento</label>
+                    <input type="text" class="form-control" value="{{ sorteio.apartamento }}" readonly>
+                </div>
+                <div class="col-sm-2">
+                    <label class="form-label text-dark">Vaga</label>
+                    <input type="text" class="form-control" value="{{ sorteio.vaga }}" readonly>
+                </div>
+                <div class="col-sm-2">
+                    <label class="form-label text-dark">Subsolo</label>
+                    <input type="text" class="form-control" value="{{ sorteio.subsolo }}" readonly>
+                </div>
+                <div class="col-sm-2">
+                    <label class="form-label text-dark">Tipo da Vaga</label>
+                    <input type="text" class="form-control" value="{{ sorteio.tipo_vaga }}" readonly>
+                </div>
+                <div class="col-sm-2">
+                    <label class="form-label text-dark">Especialidade</label>
+                    <input type="text" class="form-control" value="{{ sorteio.especialidade }}" readonly>
+                </div>
+                <div class="col-sm-2">
+                    <label class="form-label text-dark">Dupla Com</label>
+                    <input type="text" class="form-control" value="{{ sorteio.dupla_com }}" readonly>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        {% else %}
+        <div class="text-center mt-5">
+            <p>Nenhum resultado disponível.</p>
+        </div>
+        {% endif %}
+    </div>
+</main>
+
+{% endblock %}

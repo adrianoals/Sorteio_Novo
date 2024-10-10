@@ -1,5 +1,5 @@
 from django.urls import path
-from tres_coelhos.views import tres_coelhos_sorteio, tres_coelhos_excel, tres_coelhos_qrcode, tres_coelhos_dupla, tres_coelhos_dupla_excel, tres_coelhos_zerar
+from tres_coelhos.views import tres_coelhos_sorteio, tres_coelhos_excel, tres_coelhos_qrcode, tres_coelhos_dupla, tres_coelhos_dupla_excel, tres_coelhos_zerar, tres_coelhos_resultado
 
 urlpatterns = [
         # Rota para iniciar o sorteio
@@ -16,7 +16,10 @@ urlpatterns = [
         path('sorteio/dupla/excel/', tres_coelhos_dupla_excel, name='tres_coelhos_dupla_excel'),
         
         # Rota para zerar o sorteio
-        path('tres-coelhos-zerar/', tres_coelhos_zerar, name='tres_coelhos_zerar')
+        path('tres-coelhos-zerar/', tres_coelhos_zerar, name='tres_coelhos_zerar'),
+
+        # Rota para o resultado
+        path('tres-coelhos-resultado/', tres_coelhos_resultado, name='tres_coelhos_resultado'),
 
 ]
 
