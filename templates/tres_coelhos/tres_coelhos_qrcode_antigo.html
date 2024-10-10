@@ -39,16 +39,7 @@
             <div class="resultados-filtrados mt-2 text-dark text-center">
                 <h3 class="text-center mb-4">Vagas para o apartamento: {{ apartamento_selecionado }}</h3>
                 {% for sorteio in resultados_filtrados %}
-                    <h5>
-                        Vaga: {{ sorteio.vaga.numero }} ({{ sorteio.vaga.get_tipo_display }}) - Subsolo {{ sorteio.vaga.subsolo }}
-                        {% if sorteio.vaga.dupla_com %}
-                            <br>Dupla com a vaga: {{ sorteio.vaga.dupla_com.numero }}
-                            {% comment %} Procurando o apartamento associado à vaga dupla {% endcomment %}
-                            {% with dupla_apartamento=sorteio.vaga.dupla_com.sorteiodupla_set.first.apartamento.numero %}
-                                <br>Apartamento que faz dupla: {{ dupla_apartamento }}
-                            {% endwith %}
-                        {% endif %}
-                    </h5>
+                    <h5>Vaga: {{ sorteio.vaga.numero }} ({{ sorteio.vaga.get_tipo_display }}) - Subsolo {{ sorteio.vaga.subsolo }}</h5>
                 {% endfor %}
             </div>
         {% endif %}

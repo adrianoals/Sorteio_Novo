@@ -300,6 +300,34 @@ def tres_coelhos_excel(request):
     return response
 
 
+# def tres_coelhos_qrcode(request):
+#     # Obter todos os apartamentos para preencher o dropdown
+#     apartamentos_disponiveis = Apartamento.objects.all()
+    
+#     # Obter o apartamento selecionado através do filtro (via GET)
+#     numero_apartamento = request.GET.get('apartamento')
+    
+#     # Inicializar a variável de resultados filtrados como None
+#     resultados_filtrados = []
+
+#     # Se o apartamento foi selecionado, realizar a filtragem dos resultados do sorteio
+#     if numero_apartamento:
+#         # Buscar os sorteios para vagas livres
+#         sorteios_livres = Sorteio.objects.filter(apartamento__numero=numero_apartamento)
+        
+#         # Buscar os sorteios para vagas duplas
+#         sorteios_duplas = SorteioDupla.objects.filter(apartamento__numero=numero_apartamento)
+
+#         # Unir os resultados de vagas livres e vagas duplas
+#         resultados_filtrados = list(sorteios_livres) + list(sorteios_duplas)
+
+#     return render(request, 'tres_coelhos/tres_coelhos_qrcode.html', {
+#         'resultados_filtrados': resultados_filtrados,
+#         'apartamento_selecionado': numero_apartamento,
+#         'apartamentos_disponiveis': apartamentos_disponiveis,
+#     })
+
+
 def tres_coelhos_qrcode(request):
     # Obter todos os apartamentos para preencher o dropdown
     apartamentos_disponiveis = Apartamento.objects.all()
@@ -307,26 +335,22 @@ def tres_coelhos_qrcode(request):
     # Obter o apartamento selecionado através do filtro (via GET)
     numero_apartamento = request.GET.get('apartamento')
     
-    # Inicializar a variável de resultados filtrados como None
+    # Inicializar a variável de resultados filtrados como uma lista vazia
     resultados_filtrados = []
 
     # Se o apartamento foi selecionado, realizar a filtragem dos resultados do sorteio
     if numero_apartamento:
-        # Buscar os sorteios para vagas livres
-        sorteios_livres = Sorteio.objects.filter(apartamento__numero=numero_apartamento)
-        
-        # Buscar os sorteios para vagas duplas
+        # Buscar os sorteios para o apartamento selecionado
         sorteios_duplas = SorteioDupla.objects.filter(apartamento__numero=numero_apartamento)
 
-        # Unir os resultados de vagas livres e vagas duplas
-        resultados_filtrados = list(sorteios_livres) + list(sorteios_duplas)
+        # Armazenar os resultados filtrados
+        resultados_filtrados = sorteios_duplas
 
     return render(request, 'tres_coelhos/tres_coelhos_qrcode.html', {
         'resultados_filtrados': resultados_filtrados,
         'apartamento_selecionado': numero_apartamento,
         'apartamentos_disponiveis': apartamentos_disponiveis,
     })
-
 
 
 
