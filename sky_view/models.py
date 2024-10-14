@@ -3,7 +3,6 @@ from django.db import models
 # Representa cada apartamento
 class Apartamento(models.Model):
     numero = models.CharField(max_length=5)  # Ex: "1404", "1501"
-    andar = models.IntegerField()  # Ex: "14", "15", "16"
     direito_vaga_dupla = models.BooleanField(default=False)
     direito_duas_vagas_livres = models.BooleanField(default=False)
     
@@ -19,8 +18,8 @@ class Vaga(models.Model):
         ('4º Subsolo', '4º Subsolo')
     ]
     
-    numero = models.CharField(max_length=5)  # Ex: "Vaga 01", "Vaga Dupla 01 e 02"
-    subsolo = models.CharField(max_length=3, choices=SUBSOLO_CHOICES)
+    numero = models.CharField(max_length=20)  # Ex: "Vaga 01", "Vaga Dupla 01 e 02"
+    subsolo = models.CharField(max_length=10, choices=SUBSOLO_CHOICES)
     tipo_vaga = models.CharField(max_length=10, choices=[('simples', 'Simples'), ('dupla', 'Dupla')])
     
     def __str__(self):

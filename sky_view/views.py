@@ -14,12 +14,15 @@ from .models import Apartamento, Vaga, Sorteio
 
 
 # View para realizar o sorteio
-def sky_views_sorteio(request):
+def sky_view_sorteio(request):
     if request.method == 'POST':
+        # Limpar registros anteriores de sorteio (opcional)
+        Sorteio.objects.all().delete()
+
         # Obtenha todos os apartamentos e vagas disponíveis
         apartamentos = Apartamento.objects.all()
-        vagas_simples = Vaga.objects.filter(tipo_vaga='simples')
-        vagas_duplas = Vaga.objects.filter(tipo_vaga='dupla')
+        vagas_simples = list(Vaga.objects.filter(tipo_vaga='simples'))  # Convertido para lista
+        vagas_duplas = list(Vaga.objects.filter(tipo_vaga='dupla'))  # Convertido para lista
 
         resultados_sorteio = []
 
@@ -27,32 +30,36 @@ def sky_views_sorteio(request):
         for apartamento in apartamentos:
             if apartamento.direito_vaga_dupla:
                 # Se o apartamento tiver direito a vaga dupla, sorteia uma vaga dupla
-                vaga_dupla = random.choice(vagas_duplas)
-                sorteio = Sorteio.objects.create(apartamento=apartamento, vaga=vaga_dupla)
-                resultados_sorteio.append(sorteio)
-                # Remover a vaga dupla sorteada da lista para evitar repetições
-                vagas_duplas = vagas_duplas.exclude(id=vaga_dupla.id)
+                if vagas_duplas:
+                    vaga_dupla = random.choice(vagas_duplas)
+                    sorteio = Sorteio.objects.create(apartamento=apartamento, vaga=vaga_dupla)
+                    resultados_sorteio.append(sorteio)
+                    # Remover a vaga dupla sorteada da lista
+                    vagas_duplas.remove(vaga_dupla)
             elif apartamento.direito_duas_vagas_livres:
                 # Para apartamentos com duas vagas livres (sequenciais no mesmo subsolo)
-                subsolo = random.choice(['1SS', '2SS', '3SS', '4SS'])
-                vagas_no_subsolo = vagas_simples.filter(subsolo=subsolo)
+                subsolo = random.choice(['1º Subsolo', '2º Subsolo', '3º Subsolo', '4º Subsolo'])
+                vagas_no_subsolo = [v for v in vagas_simples if v.subsolo == subsolo]
                 if len(vagas_no_subsolo) >= 2:
                     vaga1 = vagas_no_subsolo[0]
                     vaga2 = vagas_no_subsolo[1]
                     Sorteio.objects.create(apartamento=apartamento, vaga=vaga1)
                     Sorteio.objects.create(apartamento=apartamento, vaga=vaga2)
-                    vagas_simples = vagas_simples.exclude(id__in=[vaga1.id, vaga2.id])
+                    # Remover as vagas simples sorteadas da lista
+                    vagas_simples.remove(vaga1)
+                    vagas_simples.remove(vaga2)
             else:
                 # Sorteia uma vaga simples para outros apartamentos
-                vaga_simples = random.choice(vagas_simples)
-                sorteio = Sorteio.objects.create(apartamento=apartamento, vaga=vaga_simples)
-                resultados_sorteio.append(sorteio)
-                # Remover a vaga simples sorteada da lista
-                vagas_simples = vagas_simples.exclude(id=vaga_simples.id)
+                if vagas_simples:
+                    vaga_simples = random.choice(vagas_simples)
+                    sorteio = Sorteio.objects.create(apartamento=apartamento, vaga=vaga_simples)
+                    resultados_sorteio.append(sorteio)
+                    # Remover a vaga simples sorteada da lista
+                    vagas_simples.remove(vaga_simples)
 
-        # Marcar o sorteio como iniciado e finalizado
+        # Marcar o sorteio como iniciado e armazenar o horário de conclusão
         request.session['sorteio_iniciado'] = True
-        request.session['horario_conclusao'] = timezone.now().strftime('%H:%M:%S')
+        request.session['horario_conclusao'] = timezone.localtime().strftime("%d/%m/%Y às %Hh %Mmin e %Ss")
 
         # Redireciona para a mesma página após o sorteio
         return redirect(reverse('sky_view_sorteio'))
@@ -65,7 +72,8 @@ def sky_views_sorteio(request):
     context = {
         'sorteio_iniciado': sorteio_iniciado,
         'vagas_atribuidas': vagas_atribuidas,
-        'resultados_sorteio': resultados_sorteio
+        'resultados_sorteio': resultados_sorteio,
+        'horario_conclusao': request.session.get('horario_conclusao', '')  # Exibe o horário de conclusão
     }
 
     return render(request, 'sky_view/sky_view_sorteio.html', context)
@@ -73,7 +81,7 @@ def sky_views_sorteio(request):
 
 def sky_view_excel(request):
     # Caminho do modelo Excel
-    caminho_modelo = 'setup/static/assets/modelos/sorteio_novo.xlsx'
+    caminho_modelo = 'setup/static/assets/modelos/sorteio_skyview.xlsx'
 
     # Carregar o modelo existente
     wb = load_workbook(caminho_modelo)
@@ -92,12 +100,12 @@ def sky_view_excel(request):
         ws[f'B{linha}'] = sorteio.apartamento.numero  # Número do apartamento
         ws[f'C{linha}'] = sorteio.vaga.numero  # Número da vaga
         ws[f'D{linha}'] = f'Subsolo {sorteio.vaga.subsolo}'  # Subsolo
-        ws[f'E{linha}'] = sorteio.vaga.get_tipo_display()  # Tipo da vaga
+        ws[f'E{linha}'] = sorteio.vaga.tipo_vaga  # Tipo da vaga
         linha += 1
 
     # Configurar a resposta para o download do Excel
     response = HttpResponse(content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
-    response['Content-Disposition'] = 'attachment; filename="resultado_sorteio_sky_view.xlsx"'
+    response['Content-Disposition'] = 'attachment; filename="sorteio_sky_view.xlsx"'
 
     # Salvar o arquivo Excel na resposta
     wb.save(response)
@@ -112,23 +120,21 @@ def sky_view_qrcode(request):
     
     # Obter o apartamento selecionado através do filtro (via GET)
     numero_apartamento = request.GET.get('apartamento')
-    
+
     # Inicializar a variável de resultados filtrados como uma lista vazia
     resultados_filtrados = []
 
     # Se o apartamento foi selecionado, realizar a filtragem dos resultados do sorteio
     if numero_apartamento:
         # Buscar os sorteios para o apartamento selecionado
-        sorteios_duplas = SorteioDupla.objects.filter(apartamento__numero=numero_apartamento)
-
-        # Armazenar os resultados filtrados
-        resultados_filtrados = sorteios_duplas
+        resultados_filtrados = Sorteio.objects.filter(apartamento__numero=numero_apartamento)
 
     return render(request, 'sky_view/sky_view_qrcode.html', {
         'resultados_filtrados': resultados_filtrados,
         'apartamento_selecionado': numero_apartamento,
         'apartamentos_disponiveis': apartamentos_disponiveis,
     })
+
 
 
 def sky_view_zerar(request):

@@ -5,8 +5,8 @@ from .models import Apartamento, Vaga, Sorteio
 
 @admin.register(Apartamento)
 class ApartamentoAdmin(admin.ModelAdmin):
-    list_display = ('numero', 'andar', 'direito_vaga_dupla', 'direito_duas_vagas_livres')
-    list_filter = ('andar', 'direito_vaga_dupla', 'direito_duas_vagas_livres')
+    list_display = ('numero', 'direito_vaga_dupla', 'direito_duas_vagas_livres')
+    list_filter = ('direito_vaga_dupla', 'direito_duas_vagas_livres')
     search_fields = ('numero',)
 
 @admin.register(Vaga)
