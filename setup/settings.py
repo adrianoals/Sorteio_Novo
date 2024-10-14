@@ -45,6 +45,8 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles', 
     'tres_coelhos.apps.TresCoelhosConfig',
+    'sky_view.apps.SkyViewConfig',
+
 ]
 
 MIDDLEWARE = [
