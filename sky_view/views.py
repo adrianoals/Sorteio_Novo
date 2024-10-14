@@ -5,141 +5,70 @@ from django.shortcuts import render, redirect
 from django.utils import timezone
 import random
 from django.http import HttpResponse
+from django.urls import reverse
 # from openpyxl import Workbook  # Para gerar o Excel
 from openpyxl import load_workbook
 import qrcode  # Para gerar o QR Code
 from io import BytesIO  # Para manipular imagens em memória
-from .models import Apartamento, Vaga, Sorteio, SorteioDupla, DuplaApartamentos
+from .models import Apartamento, Vaga, Sorteio
 
 
-def sky_view_sorteio(request):
+# View para realizar o sorteio
+def sky_views_sorteio(request):
     if request.method == 'POST':
-        # Limpar registros anteriores de sorteio
-        Sorteio.objects.all().delete()
-        print("Sorteios anteriores apagados.")
+        # Obtenha todos os apartamentos e vagas disponíveis
+        apartamentos = Apartamento.objects.all()
+        vagas_simples = Vaga.objects.filter(tipo_vaga='simples')
+        vagas_duplas = Vaga.objects.filter(tipo_vaga='dupla')
 
-        # Obter apartamentos PNE, Idosos e Normais, excluindo os com apenas_dupla=True onde não aplicável
-        apartamentos_pne_apenas_livre = list(Apartamento.objects.filter(is_pne=True, apenas_livre=True, apenas_dupla=False))
-        apartamentos_pne_sem_restricao = list(Apartamento.objects.filter(is_pne=True, apenas_livre=False, apenas_dupla=False))
-        apartamentos_idoso = list(Apartamento.objects.filter(is_idoso=True, apenas_dupla=False))
-        apartamentos_normais = list(Apartamento.objects.filter(is_pne=False, is_idoso=False, apenas_dupla=False))
+        resultados_sorteio = []
 
-        print(f"Apartamentos PNE (apenas livres): {len(apartamentos_pne_apenas_livre)}")
-        print(f"Apartamentos PNE (sem restrições): {len(apartamentos_pne_sem_restricao)}")
-        print(f"Apartamentos Idosos: {len(apartamentos_idoso)}")
-        print(f"Apartamentos Normais: {len(apartamentos_normais)}")
-
-        # Obter vagas do banco de dados separadas por especialidade e tipo
-        vagas_pne_livres = list(Vaga.objects.filter(especial='PNE', tipo='LIVRE'))
-        vagas_pne_duplas = list(Vaga.objects.filter(especial='PNE', tipo='DUPLA'))
-        vagas_idosos = list(Vaga.objects.filter(especial='IDOSO', tipo='LIVRE'))
-        vagas_idosos_duplas = list(Vaga.objects.filter(especial='IDOSO', tipo='DUPLA'))
-        vagas_livres = list(Vaga.objects.filter(especial='NORMAL', tipo='LIVRE'))
-
-        print(f"Vagas PNE Livres: {len(vagas_pne_livres)}, Vagas PNE Duplas: {len(vagas_pne_duplas)}")
-        print(f"Vagas Idosos Livres: {len(vagas_idosos)}, Vagas Idosos Duplas: {len(vagas_idosos_duplas)}")
-        print(f"Vagas Livres: {len(vagas_livres)}")
-
-        # Apartamentos que já ganharam vagas especiais (para não concorrerem nas vagas livres)
-        apartamentos_com_vaga = []
-
-        # **Sorteio prioritário para PNE com apenas_livre=True (vagas livres PNE)**
-        random.shuffle(vagas_pne_livres)  # Aleatoriza as vagas PNE livres
-        for vaga in vagas_pne_livres:
-            if apartamentos_pne_apenas_livre:
-                apartamento_escolhido = random.choice(apartamentos_pne_apenas_livre)
-                Sorteio.objects.create(apartamento=apartamento_escolhido, vaga=vaga)
-                print(f"Sorteado (PNE - apenas_livre): {apartamento_escolhido.numero} para a vaga PNE Livre {vaga.numero}")
-                apartamentos_pne_apenas_livre.remove(apartamento_escolhido)
-                apartamentos_com_vaga.append(apartamento_escolhido)
+        # Loop por cada apartamento e sortear vagas
+        for apartamento in apartamentos:
+            if apartamento.direito_vaga_dupla:
+                # Se o apartamento tiver direito a vaga dupla, sorteia uma vaga dupla
+                vaga_dupla = random.choice(vagas_duplas)
+                sorteio = Sorteio.objects.create(apartamento=apartamento, vaga=vaga_dupla)
+                resultados_sorteio.append(sorteio)
+                # Remover a vaga dupla sorteada da lista para evitar repetições
+                vagas_duplas = vagas_duplas.exclude(id=vaga_dupla.id)
+            elif apartamento.direito_duas_vagas_livres:
+                # Para apartamentos com duas vagas livres (sequenciais no mesmo subsolo)
+                subsolo = random.choice(['1SS', '2SS', '3SS', '4SS'])
+                vagas_no_subsolo = vagas_simples.filter(subsolo=subsolo)
+                if len(vagas_no_subsolo) >= 2:
+                    vaga1 = vagas_no_subsolo[0]
+                    vaga2 = vagas_no_subsolo[1]
+                    Sorteio.objects.create(apartamento=apartamento, vaga=vaga1)
+                    Sorteio.objects.create(apartamento=apartamento, vaga=vaga2)
+                    vagas_simples = vagas_simples.exclude(id__in=[vaga1.id, vaga2.id])
             else:
-                # Se todos apartamentos com restrição já foram sorteados, preencher as vagas restantes com apartamentos sem restrição
-                if apartamentos_pne_sem_restricao:
-                    apartamento_escolhido = random.choice(apartamentos_pne_sem_restricao)
-                    Sorteio.objects.create(apartamento=apartamento_escolhido, vaga=vaga)
-                    print(f"Sorteado (PNE - sem restrição): {apartamento_escolhido.numero} para a vaga PNE Livre {vaga.numero}")
-                    apartamentos_pne_sem_restricao.remove(apartamento_escolhido)
-                    apartamentos_com_vaga.append(apartamento_escolhido)
-                else:
-                    if vaga.is_livre_quando_nao_especial:  # Apenas se a vaga puder ser livre
-                        vagas_livres.append(vaga)
-                        print(f"Vaga PNE {vaga.numero} incluída nas vagas livres.")
+                # Sorteia uma vaga simples para outros apartamentos
+                vaga_simples = random.choice(vagas_simples)
+                sorteio = Sorteio.objects.create(apartamento=apartamento, vaga=vaga_simples)
+                resultados_sorteio.append(sorteio)
+                # Remover a vaga simples sorteada da lista
+                vagas_simples = vagas_simples.exclude(id=vaga_simples.id)
 
-        # **Sorteio para PNE sem restrição (vagas duplas PNE)**
-        random.shuffle(vagas_pne_duplas)  # Aleatoriza as vagas PNE duplas
-        for vaga in vagas_pne_duplas:
-            # Filtrar apartamentos que estão no mesmo subsolo da vaga
-            apartamentos_elegiveis = [ap for ap in apartamentos_pne_sem_restricao if ap.subsolo == vaga.subsolo]
-            if apartamentos_elegiveis:
-                apartamento_escolhido = random.choice(apartamentos_elegiveis)
-                Sorteio.objects.create(apartamento=apartamento_escolhido, vaga=vaga)
-                print(f"Sorteado (PNE - sem restrição): {apartamento_escolhido.numero} para a vaga PNE Dupla {vaga.numero}")
-                apartamentos_pne_sem_restricao.remove(apartamento_escolhido)
-                apartamentos_com_vaga.append(apartamento_escolhido)
-            else:
-                if vaga.is_livre_quando_nao_especial:  # Apenas se a vaga puder ser livre
-                    vagas_livres.append(vaga)
-                    print(f"Vaga PNE Dupla {vaga.numero} incluída nas vagas livres.")
-
-        # **Sorteio Aleatório para Idosos (apenas vagas livres)**
-        random.shuffle(vagas_idosos)  # Aleatoriza as vagas Idosos livres
-        for vaga in vagas_idosos:
-            apartamentos_elegiveis = [ap for ap in apartamentos_idoso if ap.subsolo == vaga.subsolo and not ap.apenas_dupla]
-            if apartamentos_elegiveis:
-                apartamento_escolhido = random.choice(apartamentos_elegiveis)
-                Sorteio.objects.create(apartamento=apartamento_escolhido, vaga=vaga)
-                print(f"Sorteado: {apartamento_escolhido.numero} para a vaga Idoso {vaga.numero}")
-                apartamentos_idoso.remove(apartamento_escolhido)
-                apartamentos_com_vaga.append(apartamento_escolhido)
-            else:
-                if vaga.is_livre_quando_nao_especial:
-                    vagas_livres.append(vaga)
-
-        # **Sorteio Aleatório para Idosos (apenas vagas duplas)**
-        random.shuffle(vagas_idosos_duplas)
-        for vaga in vagas_idosos_duplas:
-            apartamentos_elegiveis = [ap for ap in apartamentos_idoso if ap.subsolo == vaga.subsolo and not ap.apenas_livre]
-            if apartamentos_elegiveis:
-                apartamento_escolhido = random.choice(apartamentos_elegiveis)
-                Sorteio.objects.create(apartamento=apartamento_escolhido, vaga=vaga)
-                apartamentos_idoso.remove(apartamento_escolhido)
-                apartamentos_com_vaga.append(apartamento_escolhido)
-            else:
-                if vaga.is_livre_quando_nao_especial:
-                    vagas_livres.append(vaga)
-
-        # **Sorteio de apartamentos restantes para vagas livres**
-        apartamentos_disponiveis = apartamentos_normais + [ap for ap in apartamentos_pne_apenas_livre + apartamentos_pne_sem_restricao + apartamentos_idoso if ap not in apartamentos_com_vaga]
-
-        random.shuffle(apartamentos_disponiveis)
-        for apartamento in apartamentos_disponiveis:
-            vagas_filtradas = [v for v in vagas_livres if v.subsolo == apartamento.subsolo]
-            if vagas_filtradas:
-                vaga_escolhida = random.choice(vagas_filtradas)
-                Sorteio.objects.create(apartamento=apartamento, vaga=vaga_escolhida)
-                print(f"Sorteado: {apartamento.numero} para a vaga Livre {vaga_escolhida.numero}")
-                vagas_livres.remove(vaga_escolhida)
-            else:
-                print(f"Sem vagas disponíveis para o apartamento {apartamento.numero} no subsolo {apartamento.subsolo}")
-
-        # Armazenar informações do sorteio na sessão
+        # Marcar o sorteio como iniciado e finalizado
         request.session['sorteio_iniciado'] = True
-        request.session['horario_conclusao'] = timezone.localtime().strftime("%d/%m/%Y às %Hh %Mmin e %Ss")
+        request.session['horario_conclusao'] = timezone.now().strftime('%H:%M:%S')
 
-        return redirect('sky_view_sorteio')
+        # Redireciona para a mesma página após o sorteio
+        return redirect(reverse('sky_view_sorteio'))
 
-    else:
-        sorteio_iniciado = request.session.get('sorteio_iniciado', False)
-        resultados_sorteio = Sorteio.objects.select_related('apartamento', 'vaga').order_by('apartamento__id').all()
-        vagas_atribuidas = resultados_sorteio.exists()
+    # Se o método for GET, exibe os resultados ou a interface de sorteio
+    sorteio_iniciado = request.session.get('sorteio_iniciado', False)
+    vagas_atribuidas = Sorteio.objects.exists()
+    resultados_sorteio = Sorteio.objects.all() if vagas_atribuidas else None
 
-        return render(request, 'sky_view/sky_view_sorteio.html', {
-            'resultados_sorteio': resultados_sorteio,
-            'vagas_atribuidas': vagas_atribuidas,
-            'sorteio_iniciado': sorteio_iniciado,
-            'horario_conclusao': request.session.get('horario_conclusao', '')
-        })
+    context = {
+        'sorteio_iniciado': sorteio_iniciado,
+        'vagas_atribuidas': vagas_atribuidas,
+        'resultados_sorteio': resultados_sorteio
+    }
 
+    return render(request, 'sky_view/sky_view_sorteio.html', context)
 
 
 def sky_view_excel(request):
@@ -164,7 +93,6 @@ def sky_view_excel(request):
         ws[f'C{linha}'] = sorteio.vaga.numero  # Número da vaga
         ws[f'D{linha}'] = f'Subsolo {sorteio.vaga.subsolo}'  # Subsolo
         ws[f'E{linha}'] = sorteio.vaga.get_tipo_display()  # Tipo da vaga
-        ws[f'F{linha}'] = sorteio.vaga.get_especial_display()  # Especialidade da vaga
         linha += 1
 
     # Configurar a resposta para o download do Excel
@@ -206,7 +134,6 @@ def sky_view_qrcode(request):
 def sky_view_zerar(request):
     if request.method == 'POST':
         Sorteio.objects.all().delete()
-        SorteioDupla.objects.all().delete()
         return redirect('sky_view_sorteio')
     else:
         return render(request, 'sky_view/sky_view_zerar.html')

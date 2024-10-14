@@ -11,7 +11,7 @@ class ApartamentoAdmin(admin.ModelAdmin):
 
 @admin.register(Vaga)
 class VagaAdmin(admin.ModelAdmin):
-    list_display = ('numero', 'subsolo', 'tipo_vaga', 'dupla_com')
+    list_display = ('numero', 'subsolo', 'tipo_vaga')
     list_filter = ('subsolo', 'tipo_vaga')
     search_fields = ('numero',)
 

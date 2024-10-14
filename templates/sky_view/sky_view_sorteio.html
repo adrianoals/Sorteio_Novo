@@ -46,10 +46,6 @@
                     <label class="form-label text-dark">Tipo da Vaga</label>
                     <input type="text" class="form-control" value="{{ sorteio.vaga.get_tipo_display }}" readonly>
                 </div>
-                <div class="col-sm-2">
-                    <label class="form-label text-dark">Especialidade</label>
-                    <input type="text" class="form-control" value="{{ sorteio.vaga.get_especial_display }}" readonly>
-                </div>
             </div>
             {% endfor %}
         </div>
@@ -62,15 +58,12 @@
         {% if vagas_atribuidas %}
             <div class="text-center text-dark mt-5 mb-5">
                 <h5>Sorteio finalizado {{ request.session.horario_conclusao }}.</h5>
-                <a href="{% url 'sky_views_excel' %}" class="btn btn-info mt-3">Exportar para Excel</a> 
+                <a href="{% url 'sky_view_excel' %}" class="btn btn-info mt-3">Exportar para Excel</a> 
             </div>
             
             <div class="text-center mt-5">
                 <img src="{% static '/assets/images/qrcode_coelhos.png' %}" alt="QR Code" style="max-width: 200px;"/>
                 <p class="text-dark">Escaneie o QR Code para acessar seu resultado.</p>
-            </div>
-            <div class="text-center mt-5 mb-5">
-                <a href="{% url 'sky_views_dupla' %}" class="btn btn-info btn-lg">Clique para continuar o sorteio</a>
             </div>
         {% endif %}
 
