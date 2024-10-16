@@ -7,7 +7,7 @@ vagas_1ss_simples = [
 ]
 
 vagas_1ss_duplas = [
-    ('Vaga 06','Vaga 19' ),
+    ('Vaga 06', 'Vaga 19'),
     ('Vaga 13A', 'Vaga 14')
 ]
 
@@ -35,19 +35,22 @@ vagas_4ss_duplas = [
     ('Vaga 19', 'Vaga 20')
 ]
 
-# Lista de vagas para o térreo
+# Lista de vagas para o térreo, com PNE
 vagas_terreo_simples = [
-    'Vaga 01', 'Vaga 03','Vaga 04 PNE', 'Vaga 05', 'Vaga 06', 'Vaga 07', 'Vaga 08', 'Vaga 09', 'Vaga 10'
+    'Vaga 01', 'Vaga 03', 'Vaga 04 PNE', 'Vaga 05', 'Vaga 06', 'Vaga 07', 'Vaga 08', 'Vaga 09', 'Vaga 10'
 ]
 
 # Função para criar vagas
 def criar_vagas(vagas_simples, vagas_duplas, subsolo):
     # Criar vagas simples
     for numero in vagas_simples:
+        is_pne = 'PNE' in numero  # Define is_pne como True se "PNE" estiver no nome da vaga
+        numero = numero.replace(' PNE', '')  # Remove "PNE" do número da vaga
         Vaga.objects.create(
             numero=numero,
             subsolo=subsolo,
-            tipo_vaga='Simples'
+            tipo_vaga='Simples',
+            is_pne=is_pne
         )
     # Criar vagas duplas
     for vaga1, vaga2 in vagas_duplas:

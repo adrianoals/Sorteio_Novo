@@ -5,6 +5,7 @@ class Apartamento(models.Model):
     numero = models.CharField(max_length=5)  # Ex: "1404", "1501"
     direito_vaga_dupla = models.BooleanField(default=False)
     direito_duas_vagas_livres = models.BooleanField(default=False)
+    is_pne = models.BooleanField(default=False)  # Indica se o apartamento é adaptado para PNE
     
     def __str__(self):
         return f"Apartamento {self.numero}"
@@ -22,6 +23,7 @@ class Vaga(models.Model):
     numero = models.CharField(max_length=20)  # Ex: "Vaga 01", "Vaga Dupla 01 e 02"
     subsolo = models.CharField(max_length=10, choices=SUBSOLO_CHOICES)
     tipo_vaga = models.CharField(max_length=10, choices=[('Simples', 'Simples'), ('Dupla', 'Dupla')])
+    is_pne = models.BooleanField(default=False)  # Indica se a vaga é reservada para PNE
     
     def __str__(self):
         return f"{self.numero} - {self.subsolo} ({self.tipo_vaga})"
