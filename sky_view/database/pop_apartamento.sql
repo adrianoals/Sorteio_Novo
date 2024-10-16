@@ -3,7 +3,7 @@ from sky_view.models import Apartamento
 # Relação dos apartamentos com base nas regras fornecidas
 apartamentos = [
     '0101', '0102', '0103', '0104', '0105',
-    '0201', '0202', '0204', '0205', '0223',
+    '0201', '0202', '0203', '0204', '0205',
     '0301', '0302', '0303', '0304', '0305',
     '0401', '0402', '0403', '0404', '0405',
     '0501', '0502', '0503', '0504', '0505',
@@ -21,10 +21,10 @@ apartamentos = [
 ]
 
 # Apartamentos com direito a vagas duplas
-vagas_duplas = ['1601', '1602', '1603', '1604', '1605', '1501', '1502', '1503', '1504', '1505', '1401', '1402']
+vagas_duplas = ['1601', '1602', '1605', '1501', '1502', '1503', '1504', '1505', '1401', '1402', '1404', '1405']
 
-# Apartamento 1404 tem direito a duas vagas simples
-apartamento_duas_vagas_livres = ['1404']
+# Apartamento 1603 e 1604 tem direito a duas vagas simples
+apartamento_duas_vagas_livres = ['1603', "1604" ]
 
 # Função para popular os apartamentos
 for apt_num in apartamentos:

@@ -37,7 +37,7 @@ vagas_4ss_duplas = [
 
 # Lista de vagas para o térreo
 vagas_terreo_simples = [
-    'Vaga 01', 'Vaga 03', 'Vaga 05', 'Vaga 06', 'Vaga 07', 'Vaga 08', 'Vaga 09', 'Vaga 10'
+    'Vaga 01', 'Vaga 03','Vaga 04 PNE', 'Vaga 05', 'Vaga 06', 'Vaga 07', 'Vaga 08', 'Vaga 09', 'Vaga 10'
 ]
 
 # Função para criar vagas
