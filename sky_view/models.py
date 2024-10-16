@@ -12,6 +12,7 @@ class Apartamento(models.Model):
 # Representa as vagas de garagem, incluindo simples e duplas
 class Vaga(models.Model):
     SUBSOLO_CHOICES = [
+        ('Térreo', 'Térreo'),
         ('1º Subsolo', '1º Subsolo'),
         ('2º Subsolo', '2º Subsolo'),
         ('3º Subsolo', '3º Subsolo'),
