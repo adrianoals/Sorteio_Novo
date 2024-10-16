@@ -47,7 +47,7 @@ def criar_vagas(vagas_simples, vagas_duplas, subsolo):
         Vaga.objects.create(
             numero=numero,
             subsolo=subsolo,
-            tipo_vaga='simples'
+            tipo_vaga='Simples'
         )
     # Criar vagas duplas
     for vaga1, vaga2 in vagas_duplas:
@@ -55,7 +55,7 @@ def criar_vagas(vagas_simples, vagas_duplas, subsolo):
         Vaga.objects.create(
             numero=dupla,
             subsolo=subsolo,
-            tipo_vaga='dupla'
+            tipo_vaga='Dupla'
         )
 
 # Criando as vagas do 1º subsolo

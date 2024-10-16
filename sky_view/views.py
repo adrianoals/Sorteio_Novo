@@ -1,6 +1,3 @@
-from django.shortcuts import render
-
-# Create your views here.
 from django.shortcuts import render, redirect
 from django.utils import timezone
 import random
@@ -8,7 +5,6 @@ from django.http import HttpResponse
 from django.urls import reverse
 # from openpyxl import Workbook  # Para gerar o Excel
 from openpyxl import load_workbook
-import qrcode  # Para gerar o QR Code
 from io import BytesIO  # Para manipular imagens em memória
 from .models import Apartamento, Vaga, Sorteio
 

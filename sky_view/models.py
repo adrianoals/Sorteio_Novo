@@ -21,7 +21,7 @@ class Vaga(models.Model):
     
     numero = models.CharField(max_length=20)  # Ex: "Vaga 01", "Vaga Dupla 01 e 02"
     subsolo = models.CharField(max_length=10, choices=SUBSOLO_CHOICES)
-    tipo_vaga = models.CharField(max_length=10, choices=[('simples', 'Simples'), ('dupla', 'Dupla')])
+    tipo_vaga = models.CharField(max_length=10, choices=[('Simples', 'Simples'), ('Dupla', 'Dupla')])
     
     def __str__(self):
         return f"{self.numero} - {self.subsolo} ({self.tipo_vaga})"
